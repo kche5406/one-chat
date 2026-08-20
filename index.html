@@ -13,7 +13,21 @@
 input,textarea,select{width:100%;border:1px solid var(--line);border-radius:13px;padding:11px;background:#fff;color:var(--ink);outline:none}textarea{min-height:90px;resize:vertical}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.btn{padding:10px 13px;border-radius:13px;border:1px solid var(--line);background:#fff;color:var(--ink)}.btn.primary,.start{background:var(--accent);color:#fff;border-color:var(--accent)}.btn.danger{color:var(--danger)}
 .avatar{width:88px;height:88px;border-radius:23px;background:#fff3f8;border:1px dashed #e5cbd8;display:flex;align-items:center;justify-content:center;overflow:hidden;margin:9px 0}.avatar img,.mini img,.msgAvatar img{width:100%;height:100%;object-fit:cover}.hidden{display:none!important}.start{width:100%;border:0;padding:15px;border-radius:17px;font-weight:900;font-size:16px;margin-top:9px}
 #chat{display:none;min-height:100vh}#chat.active{display:flex;flex-direction:column}.chatTop{position:sticky;top:0;z-index:3;display:flex;gap:9px;align-items:center;padding:8px 0 12px;background:rgba(255,248,251,.93);backdrop-filter:blur(10px)}.mini{width:44px;height:44px;border-radius:14px;overflow:hidden;background:#fff0f6;display:flex;align-items:center;justify-content:center}.chatName{font-weight:900}.turn{font-size:11px;color:var(--muted)}.messages{padding:6px 0 100px}.msg{display:flex;gap:8px;align-items:flex-end;margin:13px 0}.msg.user{justify-content:flex-end}.bubble{max-width:82%;padding:12px 14px;border-radius:18px;white-space:pre-wrap;word-break:break-word;line-height:1.55}.msg.ai .bubble{background:#fff;border:1px solid var(--line);border-bottom-left-radius:6px}.msg.user .bubble{background:var(--accent);color:#fff;border-bottom-right-radius:6px}.msgAvatar{width:32px;height:32px;border-radius:11px;overflow:hidden;background:#fff0f6;display:flex;align-items:center;justify-content:center;flex:none}
-.composer{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(760px,100%);padding:9px 14px calc(9px + env(safe-area-inset-bottom));background:rgba(255,248,251,.95);backdrop-filter:blur(12px);border-top:1px solid var(--line);display:flex;gap:8px;z-index:4}.composer textarea{min-height:46px;max-height:130px;resize:none;flex:1}.send{width:54px;border:0;border-radius:16px;background:var(--accent);color:#fff;font-weight:900}
+.composer{
+  position:fixed;
+  bottom:var(--keyboard-offset,0px);
+  left:50%;
+  transform:translateX(-50%);
+  width:min(760px,100%);
+  padding:9px 14px calc(9px + env(safe-area-inset-bottom));
+  background:rgba(255,248,251,.95);
+  backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);
+  display:flex;
+  gap:8px;
+  z-index:4;
+  transition:bottom .15s ease;
+}.composer textarea{min-height:46px;max-height:130px;resize:none;flex:1}.send{width:54px;border:0;border-radius:16px;background:var(--accent);color:#fff;font-weight:900}
 .modal{position:fixed;inset:0;background:rgba(40,25,35,.38);display:none;align-items:center;justify-content:center;padding:18px;z-index:10}.modal.show{display:flex}.modalBox{background:#fff;border-radius:22px;padding:20px;max-width:440px;width:100%;box-shadow:0 25px 80px rgba(0,0,0,.18)}
 @media(max-width:560px){.grid{grid-template-columns:1fr}.app{padding-left:12px;padding-right:12px}.card{padding:15px}}
 </style>
@@ -44,7 +58,7 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:13px
 <section id="chat">
 <div class="chatTop"><button class="btn" id="back">설정</button><div class="mini" id="chatPrev">🌷</div><div><div class="chatName" id="chatTitle">캐릭터</div><div class="turn" id="turn">자동 저장됨</div></div><button class="btn" id="new" style="margin-left:auto">새 대화</button></div>
 <div class="messages" id="messages"></div>
-<div class="composer"><textarea id="input" placeholder="메시지를 입력하세요..." rows="1"></textarea><button class="send" id="send">전송</button></div>
+<div class="composer" id="composer"><textarea id="input" placeholder="메시지를 입력하세요..." rows="1"></textarea><button class="send" id="send">전송</button></div>
 </section>
 </div>
 
@@ -80,8 +94,84 @@ function system(){return `당신은 "${text('name')||'캐릭터'}"이다. 아래
 유저 호칭: ${text('call')}
 유저 정보/관계: ${text('userInfo')}
 시작 상황: ${text('opening')}
-실제 댜화처럼 자연스럽게 답하고, 캐릭터의 말투와 성격을 일관되게 유지한다.`}
-async function api(){const k=text('apiKey');if(!k)throw Error('API 키를 입력해주세요.');const m=text('model');const contents=history.length?history:[{role:'user',parts:[{text:'짧게 자기소개를 해줘.'}]}];const body={systemInstruction:{parts:[{text:system()}]},contents,generationConfig:{temperature:1,maxOutputTokens:1200}};const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':k},body:JSON.stringify(body)});let d={};try{d=await r.json()}catch{}if(!r.ok)throw Error(`${d?.error?.status||'API 오류'}: ${d?.error?.message||'요청에 실패했습니다.'}`);return d?.candidates?.[0]?.content?.parts?.map(x=>x.text||'').join('')||'응답이 비어 있습니다.'}
+실제 대화처럼 자연스럽게 답하고, 캐릭터의 말투와 성격을 일관되게 유지한다.`}
+async function sleep(ms){
+  return new Promise(resolve=>setTimeout(resolve,ms));
+}
+
+async function api(){
+  const k=text('apiKey');
+  if(!k) throw Error('API 키를 입력해주세요.');
+
+  const m=text('model');
+  const contents=history.length
+    ? history
+    : [{role:'user',parts:[{text:'짧게 자기소개를 해줘.'}]}];
+
+  const body={
+    systemInstruction:{
+      parts:[{text:system()}]
+    },
+    contents,
+    generationConfig:{
+      temperature:1,
+      maxOutputTokens:1200
+    }
+  };
+
+  const maxRetry=3;
+
+  for(let attempt=0;attempt<maxRetry;attempt++){
+    try{
+      const r=await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent`,
+        {
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json',
+            'x-goog-api-key':k
+          },
+          body:JSON.stringify(body)
+        }
+      );
+
+      let d={};
+      try{
+        d=await r.json();
+      }catch{}
+
+      if(r.ok){
+        return d?.candidates?.[0]?.content?.parts
+          ?.map(x=>x.text||'')
+          .join('')
+          || '응답이 비어 있습니다.';
+      }
+
+      const status=d?.error?.status||'API 오류';
+      const message=d?.error?.message||'요청에 실패했습니다.';
+
+      // 일시적인 서버 과부하/서비스 오류만 자동 재시도
+      if((r.status===503 || r.status===500 || r.status===429) && attempt<maxRetry-1){
+        await sleep(2000*(attempt+1));
+        continue;
+      }
+
+      throw Error(`${status}: ${message}`);
+
+    }catch(e){
+      // 네트워크 오류도 일시적일 수 있으므로 재시도
+      if(attempt<maxRetry-1 &&
+         (e.name==='TypeError' || /fetch|network|networkerror/i.test(e.message))){
+        await sleep(2000*(attempt+1));
+        continue;
+      }
+
+      throw e;
+    }
+  }
+
+  throw Error('Gemini 요청에 실패했습니다. 잠시 후 다시 시도해주세요.');
+}if(!k)throw Error('API 키를 입력해주세요.');const m=text('model');const contents=history.length?history:[{role:'user',parts:[{text:'짧게 자기소개를 해줘.'}]}];const body={systemInstruction:{parts:[{text:system()}]},contents,generationConfig:{temperature:1,maxOutputTokens:1200}};const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':k},body:JSON.stringify(body)});let d={};try{d=await r.json()}catch{}if(!r.ok)throw Error(`${d?.error?.status||'API 오류'}: ${d?.error?.message||'요청에 실패했습니다.'}`);return d?.candidates?.[0]?.content?.parts?.map(x=>x.text||'').join('')||'응답이 비어 있습니다.'}
 function saveChat(){try{localStorage.setItem(chatKey,JSON.stringify({history,turn:history.length}))}catch{}}
 function loadChatLocal(){try{const d=JSON.parse(localStorage.getItem(chatKey)||'null');if(d?.history){history=d.history;render();return true}}catch{}return false}
 function render(){const box=$('messages');box.innerHTML='';history.forEach(x=>addVisual(x.role==='user'?'user':'ai',x.text));$('turn').textContent=`${Math.floor(history.length/2)}턴 · 자동 저장됨`}
@@ -96,6 +186,57 @@ $('new').onclick=()=>$('modal').classList.add('show');$('cancel').onclick=()=>$(
 $('saveChat').onclick=()=>download(JSON.stringify({version:2,savedAt:new Date().toISOString(),character:text('name'),history},null,2),(text('name')||'chat')+'-conversation.json');
 $('loadChat').onclick=()=>$('chatFile').click();$('chatFile').onchange=async e=>{try{const d=JSON.parse(await e.target.files[0].text());history=d.history||[];saveChat();alert('대화를 복구했습니다. 대화 시작을 누르면 확인할 수 있습니다.')}catch{alert('대화 백업 파일을 읽지 못했습니다.')}e.target.value=''};
 window.addEventListener('beforeunload',()=>{saveLocal();saveChat()});document.addEventListener('visibilitychange',()=>{if(document.hidden){saveLocal();saveChat()}});loadLocal();loadChatLocal();preview();
+function updateKeyboardPosition(){
+  const composer=$('composer');
+  if(!composer) return;
+
+  const vv=window.visualViewport;
+
+  if(!vv){
+    document.documentElement.style.setProperty('--keyboard-offset','0px');
+    return;
+  }
+
+  const offset=Math.max(
+    0,
+    window.innerHeight-vv.height-vv.offsetTop
+  );
+
+  document.documentElement.style.setProperty(
+    '--keyboard-offset',
+    `${offset}px`
+  );
+}
+
+if(window.visualViewport){
+  window.visualViewport.addEventListener(
+    'resize',
+    updateKeyboardPosition
+  );
+
+  window.visualViewport.addEventListener(
+    'scroll',
+    updateKeyboardPosition
+  );
+}
+
+$('input').addEventListener('focus',()=>{
+  setTimeout(updateKeyboardPosition,100);
+  setTimeout(updateKeyboardPosition,300);
+});
+
+$('input').addEventListener('blur',()=>{
+  setTimeout(()=>{
+    document.documentElement.style.setProperty(
+      '--keyboard-offset',
+      '0px'
+    );
+  },150);
+});
+
+window.addEventListener('resize',updateKeyboardPosition);
+
+updateKeyboardPosition();
 </script>
 </body>
 </html>
