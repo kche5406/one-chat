@@ -30,7 +30,7 @@ input,textarea,select{width:100%;border:1px solid var(--line);border-radius:13px
 <div class="card">
 <h2>🌷 캐릭터 설정</h2><div class="hint">입력할 때마다 이 기기에 자동 저장됩니다.</div>
 <div class="avatar" id="charPrev">🖼️</div><div class="row"><button class="btn" id="charUpload">이미지 업로드</button><button class="btn danger" id="charRemove">삭제</button><input id="charImg" type="file" accept="image/*" class="hidden"></div>
-<div class="grid"><div class="field"><label>이름 *</label><input id="name" placeholder="예: 유진"></div><div class="field"><label>성별</label><input id="gender"></div><div class="field"><label>나이</label><input id="age"></div><div class="field"><label>모델</label><select id="model"><option value="gemini-2.5-flash">Gemini 2.5 Flash</option><option value="gemini-2.5-pro">Gemini 2.5 Pro</option></select></div></div>
+<div class="grid"><div class="field"><label>이름 *</label><input id="name" placeholder="예: 유진"></div><div class="field"><label>성별</label><input id="gender"></div><div class="field"><label>나이</label><input id="age"></div><div class="field"><label>모델</label><select id="model"><option value="gemini-3.7-flash">Gemini 3.7 Flash</option><option value="gemini-3.1-pro-preview">Gemini 3.1 Pro</option></select></div></div>
 <div class="field"><label>성격</label><textarea id="personality"></textarea></div><div class="field"><label>말투 / 어미</label><textarea id="speech"></textarea></div><div class="field"><label>말버릇 / 즐겨 쓰는 표현</label><textarea id="habits"></textarea></div><div class="field"><label>절대 쓰지 않는 표현</label><textarea id="forbidden"></textarea></div><div class="field"><label>캐릭터 서사 / 배경</label><textarea id="backstory"></textarea></div><div class="field"><label>세계관 / 무대</label><textarea id="world"></textarea></div>
 </div>
 
@@ -80,7 +80,7 @@ function system(){return `당신은 "${text('name')||'캐릭터'}"이다. 아래
 유저 호칭: ${text('call')}
 유저 정보/관계: ${text('userInfo')}
 시작 상황: ${text('opening')}
-실제 채팅처럼 자연스럽게 답하고, 캐릭터의 말투와 성격을 일관되게 유지한다.`}
+실제 댜화처럼 자연스럽게 답하고, 캐릭터의 말투와 성격을 일관되게 유지한다.`}
 async function api(){const k=text('apiKey');if(!k)throw Error('API 키를 입력해주세요.');const m=text('model');const contents=history.length?history:[{role:'user',parts:[{text:'짧게 자기소개를 해줘.'}]}];const body={systemInstruction:{parts:[{text:system()}]},contents,generationConfig:{temperature:1,maxOutputTokens:1200}};const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':k},body:JSON.stringify(body)});let d={};try{d=await r.json()}catch{}if(!r.ok)throw Error(`${d?.error?.status||'API 오류'}: ${d?.error?.message||'요청에 실패했습니다.'}`);return d?.candidates?.[0]?.content?.parts?.map(x=>x.text||'').join('')||'응답이 비어 있습니다.'}
 function saveChat(){try{localStorage.setItem(chatKey,JSON.stringify({history,turn:history.length}))}catch{}}
 function loadChatLocal(){try{const d=JSON.parse(localStorage.getItem(chatKey)||'null');if(d?.history){history=d.history;render();return true}}catch{}return false}
