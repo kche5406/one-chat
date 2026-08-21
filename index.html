@@ -6,10 +6,7 @@
 <meta name="theme-color" content="#f3faff">
 <title>ONE CHAT</title>
 <style>
-:root{
---bg:#f5fbff;--card:#fff;--ink:#35424b;--muted:#8b9aa3;
---line:#dfeef5;--accent:#82c9e8;--accent2:#62b5d8;--danger:#c85e72
-}
+:root{--bg:#f5fbff;--card:#fff;--ink:#35424b;--muted:#8b9aa3;--line:#dfeef5;--accent:#82c9e8;--accent2:#62b5d8;--danger:#c85e72}
 *{box-sizing:border-box}
 body{margin:0;background:linear-gradient(180deg,#f2faff,#fff);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif}
 button,input,textarea,select{font:inherit}button{cursor:pointer}
@@ -43,7 +40,7 @@ color:var(--muted);
 padding:0 0 7px;
 display:flex;
 flex-wrap:wrap;
-gap:4px 10px;
+gap:4px 10px
 }
 
 .messages{padding:6px 0 100px}
@@ -133,28 +130,6 @@ gap:4px 10px;
 </div>
 
 <div class="card">
-<h2>현재 상태</h2>
-
-<div class="field">
-<label>현재 위치</label>
-<input id="location" placeholder="예: 집 - 안방">
-</div>
-
-<div class="field">
-<label>시간</label>
-<select id="time">
-<option value="오전">오전</option>
-<option value="오후" selected>오후</option>
-</select>
-</div>
-
-<div class="field">
-<label>현재 상황</label>
-<input id="situation" placeholder="예: 함께 쉬는 중">
-</div>
-</div>
-
-<div class="card">
 <h2>시작 상황</h2>
 <textarea id="opening" placeholder="첫 장면을 적어주세요."></textarea>
 </div>
@@ -181,9 +156,9 @@ gap:4px 10px;
 </div>
 
 <div class="chatInfo">
-<span id="chatLocation"></span>
-<span id="chatTime"></span>
-<span id="chatSituation"></span>
+<span id="chatLocation">위치: -</span>
+<span id="chatTime">시간: -</span>
+<span id="chatSituation">상황: -</span>
 </div>
 
 <div class="messages" id="messages"></div>
@@ -207,14 +182,16 @@ gap:4px 10px;
 </div>
 
 <script>
-const ids=[
-'name','gender','age','model','personality','speech','habits',
-'forbidden','backstory','world','worldUrl','call','userInfo',
-'location','time','situation','opening'
-];
-
+const ids=['name','gender','age','model','personality','speech','habits','forbidden','backstory','world','worldUrl','call','userInfo','opening'];
 const models=['gemini-2.5-flash','gemini-3.1-flash-lite'];
+
 let charImage='',userImage='',history=[],busy=false,currentModel=0;
+
+let chatState={
+location:'-',
+time:'-',
+situation:'-'
+};
 
 const $=id=>document.getElementById(id);
 const key='onechat_v3_settings',chatKey='onechat_v3_chat';
@@ -363,14 +340,10 @@ ${text('call')}
 유저 정보/관계:
 ${text('userInfo')}
 
-현재 위치:
-${text('location')}
-
-현재 시간:
-${text('time')}
-
-현재 상황:
-${text('situation')}
+현재 대화 상태:
+위치: ${chatState.location}
+시간: ${chatState.time}
+상황: ${chatState.situation}
 
 시작 상황:
 ${text('opening')}
@@ -382,7 +355,19 @@ ${text('opening')}
 표정, 시선, 몸짓, 자세, 감정과 주변 상황을 적절히 묘사한다.
 지나치게 짧게 끝내지 않는다.
 문장을 중간에 끊지 않고 완성된 문장으로 끝낸다.
-이전 대화의 맥락과 관계를 자연스럽게 이어간다.`
+이전 대화의 맥락과 관계를 자연스럽게 이어간다.
+
+대화가 진행되면서 위치, 시간, 상황이 실제로 변화하면 현재 상태를 갱신한다.
+변화가 없는 항목은 기존 상태를 그대로 유지한다.
+답변 마지막에는 반드시 다음 형식으로 현재 상태를 표시한다.
+
+[STATE]
+위치: 현재 위치
+시간: 오전 또는 오후
+상황: 현재 상황
+[/STATE]
+
+STATE 부분은 캐릭터의 대사가 아니며 실제 사용자에게 표시되지 않는다.`;
 }
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -468,6 +453,32 @@ throw e
 throw Error('사용 가능한 모델의 사용량이 모두 부족합니다.')
 }
 
+function updateChatState(){
+$('chatLocation').textContent='위치: '+chatState.location;
+$('chatTime').textContent='시간: '+chatState.time;
+$('chatSituation').textContent='상황: '+chatState.situation;
+}
+
+function extractState(answer){
+let match=answer.match(/\[STATE\]([\s\S]*?)\[\/STATE\]/i);
+
+if(!match)return answer;
+
+let s=match[1];
+
+let location=s.match(/위치\s*:\s*(.+)/i);
+let time=s.match(/시간\s*:\s*(.+)/i);
+let situation=s.match(/상황\s*:\s*(.+)/i);
+
+if(location)chatState.location=location[1].trim();
+if(time)chatState.time=time[1].trim();
+if(situation)chatState.situation=situation[1].trim();
+
+updateChatState();
+
+return answer.replace(/\[STATE\][\s\S]*?\[\/STATE\]/i,'').trim()
+}
+
 async function generateReply(){
 let work=[...history],out='',n=0;
 
@@ -486,12 +497,18 @@ work=[
 n++
 }
 
-return out
+return extractState(out)
 }
 
 function saveChat(){
 try{
-localStorage.setItem(chatKey,JSON.stringify({history}))
+localStorage.setItem(
+chatKey,
+JSON.stringify({
+history,
+chatState
+})
+)
 }catch(e){}
 }
 
@@ -501,6 +518,8 @@ let d=JSON.parse(localStorage.getItem(chatKey)||'null');
 
 if(d?.history){
 history=d.history;
+if(d.chatState)chatState=d.chatState;
+updateChatState();
 render();
 return true
 }
@@ -552,7 +571,7 @@ row.className='msg ai';
 
 let b=document.createElement('div');
 b.className='bubble';
-b.textContent='오류: '+msg;
+b.textContent=msg;
 
 let x=document.createElement('button');
 x.className='retryBtn';
@@ -618,12 +637,6 @@ busy=false
 }
 }
 
-function updateChatInfo(){
-$('chatLocation').textContent='위치: '+(text('location')||'설정되지 않음');
-$('chatTime').textContent='시간: '+(text('time')||'설정되지 않음');
-$('chatSituation').textContent='상황: '+(text('situation')||'설정되지 않음');
-}
-
 async function begin(){
 if(!text('name'))return alert('캐릭터 이름을 입력해주세요.');
 if(!text('apiKey'))return alert('Gemini API 키를 입력해주세요.');
@@ -631,8 +644,6 @@ if(!text('apiKey'))return alert('Gemini API 키를 입력해주세요.');
 $('setup').style.display='none';
 $('chat').classList.add('active');
 $('chatTitle').textContent=text('name');
-
-updateChatInfo();
 
 if(loadChatLocal())return;
 
@@ -643,11 +654,7 @@ parts:[{
 text:`[시작 상황]
 ${text('opening')}
 
-현재 위치: ${text('location')}
-현재 시간: ${text('time')}
-현재 상황: ${text('situation')}
-
-이 장면에서 캐릭터로 먼저 말을 걸어줘.`
+이 장면을 바탕으로 현재 위치, 시간, 상황을 판단하고 캐릭터로 먼저 말을 걸어줘.`
 }]
 }];
 
@@ -691,7 +698,7 @@ parts:[{text:'짧게 자기소개를 해줘.'}]
 
 s.textContent='연결 성공!'
 }catch(e){
-s.textContent='오류: '+e.message
+s.textContent=e.message
 }
 };
 
@@ -723,16 +730,19 @@ $('cancel').onclick=()=>$('modal').classList.remove('show');
 $('yes').onclick=()=>{
 $('modal').classList.remove('show');
 history=[];
+chatState={location:'-',time:'-',situation:'-'};
 localStorage.removeItem(chatKey);
+updateChatState();
 render()
 };
 
 $('saveChat').onclick=()=>{
 download(
 JSON.stringify({
-version:4,
+version:5,
 savedAt:new Date().toISOString(),
 character:text('name'),
+chatState,
 history
 },null,2),
 (text('name')||'chat')+'-conversation.json'
@@ -745,7 +755,9 @@ $('chatFile').onchange=async e=>{
 try{
 let d=JSON.parse(await e.target.files[0].text());
 history=d.history||[];
+if(d.chatState)chatState=d.chatState;
 saveChat();
+updateChatState();
 render();
 alert('대화를 복구했습니다.')
 }catch{
@@ -754,7 +766,6 @@ alert('대화 파일을 읽지 못했습니다.')
 e.target.value=''
 };
 
-/* 세계관 자료 */
 $('readWorld').onclick=async()=>{
 let url=text('worldUrl');
 
@@ -765,7 +776,6 @@ $('worldStatus').textContent='자료 읽는 중…';
 
 try{
 let r=await fetch(url);
-
 if(!r.ok)throw Error();
 
 let doc=new DOMParser().parseFromString(
@@ -781,9 +791,7 @@ let content=(doc.body?.innerText||'')
 .trim();
 
 if(!content)throw Error();
-
-if(content.length>12000)
-content=content.slice(0,12000);
+if(content.length>12000)content=content.slice(0,12000);
 
 $('world').value=
 text('world')+
@@ -791,11 +799,9 @@ text('world')+
 '[외부 세계관 자료]\n'+content;
 
 saveLocal();
-
 $('worldStatus').textContent='세계관 자료를 추가했습니다.'
 }catch(e){
-$('worldStatus').textContent=
-'읽지 못했습니다. 해당 사이트가 외부 접근을 막고 있을 수 있습니다.'
+$('worldStatus').textContent='읽지 못했습니다. 해당 사이트가 외부 접근을 막고 있을 수 있습니다.'
 }
 };
 
@@ -814,6 +820,7 @@ saveChat()
 loadLocal();
 loadChatLocal();
 preview();
+updateChatState();
 </script>
 </body>
 </html>
