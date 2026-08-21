@@ -36,6 +36,16 @@ textarea{min-height:90px;resize:vertical}
 #chat.active{display:flex;flex-direction:column}
 .chatTop{position:sticky;top:0;z-index:3;display:flex;gap:9px;align-items:center;padding:8px 0 12px;background:rgba(245,251,255,.94);backdrop-filter:blur(10px)}
 .chatName{font-weight:900}.turn{font-size:11px;color:var(--muted)}
+
+.chatInfo{
+font-size:10px;
+color:var(--muted);
+padding:0 0 7px;
+display:flex;
+flex-wrap:wrap;
+gap:4px 10px;
+}
+
 .messages{padding:6px 0 100px}
 .msg{display:flex;justify-content:flex-start;margin:13px 0}
 .msg.user{justify-content:flex-end}
@@ -123,6 +133,28 @@ textarea{min-height:90px;resize:vertical}
 </div>
 
 <div class="card">
+<h2>현재 상태</h2>
+
+<div class="field">
+<label>현재 위치</label>
+<input id="location" placeholder="예: 집 - 안방">
+</div>
+
+<div class="field">
+<label>시간</label>
+<select id="time">
+<option value="오전">오전</option>
+<option value="오후" selected>오후</option>
+</select>
+</div>
+
+<div class="field">
+<label>현재 상황</label>
+<input id="situation" placeholder="예: 함께 쉬는 중">
+</div>
+</div>
+
+<div class="card">
 <h2>시작 상황</h2>
 <textarea id="opening" placeholder="첫 장면을 적어주세요."></textarea>
 </div>
@@ -148,6 +180,12 @@ textarea{min-height:90px;resize:vertical}
 <button class="btn" id="new" style="margin-left:auto">새 대화</button>
 </div>
 
+<div class="chatInfo">
+<span id="chatLocation"></span>
+<span id="chatTime"></span>
+<span id="chatSituation"></span>
+</div>
+
 <div class="messages" id="messages"></div>
 
 <div class="composer">
@@ -169,31 +207,52 @@ textarea{min-height:90px;resize:vertical}
 </div>
 
 <script>
-const ids=['name','gender','age','model','personality','speech','habits','forbidden','backstory','world','worldUrl','call','userInfo','opening'];
+const ids=[
+'name','gender','age','model','personality','speech','habits',
+'forbidden','backstory','world','worldUrl','call','userInfo',
+'location','time','situation','opening'
+];
+
 const models=['gemini-2.5-flash','gemini-3.1-flash-lite'];
 let charImage='',userImage='',history=[],busy=false,currentModel=0;
-const $=id=>document.getElementById(id),key='onechat_v3_settings',chatKey='onechat_v3_chat';
+
+const $=id=>document.getElementById(id);
+const key='onechat_v3_settings',chatKey='onechat_v3_chat';
 const text=id=>$(id).value.trim();
 
 function compress(file){
 return new Promise((resolve,reject)=>{
 let r=new FileReader();
-r.onload=()=>{let im=new Image();
-im.onload=()=>{let s=Math.min(1,420/Math.max(im.width,im.height)),c=document.createElement('canvas');
-c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);
-resolve(c.toDataURL('image/jpeg',.82))};
-im.onerror=reject;im.src=r.result};
-r.onerror=reject;r.readAsDataURL(file)
+r.onload=()=>{
+let im=new Image();
+im.onload=()=>{
+let s=Math.min(1,420/Math.max(im.width,im.height)),c=document.createElement('canvas');
+c.width=im.width*s;c.height=im.height*s;
+c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+resolve(c.toDataURL('image/jpeg',.82))
+};
+im.onerror=reject;
+im.src=r.result
+};
+r.onerror=reject;
+r.readAsDataURL(file)
 })}
 
 function settings(){
-let o={};ids.forEach(i=>o[i]=$(i).value);
-o.charImage=charImage;o.userImage=userImage;return o
+let o={};
+ids.forEach(i=>o[i]=$(i).value);
+o.charImage=charImage;
+o.userImage=userImage;
+return o
 }
 
 function apply(o){
-ids.forEach(i=>{if(o[i]!==undefined)$(i).value=o[i]});
-charImage=o.charImage||'';userImage=o.userImage||'';preview()
+ids.forEach(i=>{
+if(o[i]!==undefined)$(i).value=o[i]
+});
+charImage=o.charImage||'';
+userImage=o.userImage||'';
+preview()
 }
 
 function preview(){
@@ -202,13 +261,18 @@ $('userPrev').innerHTML=userImage?`<img src="${userImage}">`:'이미지'
 }
 
 function saveLocal(){
-try{localStorage.setItem(key,JSON.stringify(settings()))}
-catch(e){$('status').textContent='저장 공간이 부족합니다.'}
+try{
+localStorage.setItem(key,JSON.stringify(settings()))
+}catch(e){
+$('status').textContent='저장 공간이 부족합니다.'
+}
 }
 
 function loadLocal(){
-try{let s=localStorage.getItem(key);if(s)apply(JSON.parse(s))}
-catch(e){}
+try{
+let s=localStorage.getItem(key);
+if(s)apply(JSON.parse(s))
+}catch(e){}
 }
 
 ids.forEach(i=>$(i).addEventListener('input',saveLocal));
@@ -218,33 +282,54 @@ $('userUpload').onclick=()=>$('userImg').click();
 
 $('charImg').onchange=async e=>{
 if(e.target.files[0]){
-charImage=await compress(e.target.files[0]);preview();saveLocal()
+charImage=await compress(e.target.files[0]);
+preview();
+saveLocal()
 }}
 
 $('userImg').onchange=async e=>{
 if(e.target.files[0]){
-userImage=await compress(e.target.files[0]);preview();saveLocal()
+userImage=await compress(e.target.files[0]);
+preview();
+saveLocal()
 }}
 
-$('charRemove').onclick=()=>{charImage='';preview();saveLocal()};
-$('userRemove').onclick=()=>{userImage='';preview();saveLocal()};
+$('charRemove').onclick=()=>{
+charImage='';
+preview();
+saveLocal()
+};
+
+$('userRemove').onclick=()=>{
+userImage='';
+preview();
+saveLocal()
+};
 
 function download(data,name){
 let a=document.createElement('a');
 a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
-a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)
+a.download=name;
+a.click();
+setTimeout(()=>URL.revokeObjectURL(a.href),500)
 }
 
 $('saveChar').onclick=()=>{
-let o=settings();delete o.apiKey;
+let o=settings();
+delete o.apiKey;
 download(JSON.stringify(o,null,2),(text('name')||'character')+'-settings.json')
-}
+};
 
 $('loadChar').onclick=()=>$('charFile').click();
 
 $('charFile').onchange=async e=>{
-try{apply(JSON.parse(await e.target.files[0].text()));saveLocal();alert('설정을 불러왔습니다.')}
-catch{alert('설정 파일을 읽지 못했습니다.')}
+try{
+apply(JSON.parse(await e.target.files[0].text()));
+saveLocal();
+alert('설정을 불러왔습니다.')
+}catch{
+alert('설정 파일을 읽지 못했습니다.')
+}
 e.target.value=''
 };
 
@@ -278,6 +363,15 @@ ${text('call')}
 유저 정보/관계:
 ${text('userInfo')}
 
+현재 위치:
+${text('location')}
+
+현재 시간:
+${text('time')}
+
+현재 상황:
+${text('situation')}
+
 시작 상황:
 ${text('opening')}
 
@@ -298,14 +392,21 @@ let r=await fetch(
 `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
 {
 method:'POST',
-headers:{'Content-Type':'application/json','x-goog-api-key':text('apiKey')},
+headers:{
+'Content-Type':'application/json',
+'x-goog-api-key':text('apiKey')
+},
 body:JSON.stringify({
 systemInstruction:{parts:[{text:system()}]},
 contents,
-generationConfig:{temperature:1,maxOutputTokens:2500}
+generationConfig:{
+temperature:1,
+maxOutputTokens:2500
+}
 })
 });
-let d={};try{d=await r.json()}catch{}
+let d={};
+try{d=await r.json()}catch{}
 return{r,d}
 }
 
@@ -328,9 +429,14 @@ let {r,d}=await callModel(model,contents);
 if(r.ok){
 let c=d?.candidates?.[0];
 let answer=c?.content?.parts?.map(x=>x.text||'').join('');
+
 if(answer){
 currentModel=(models.indexOf(model)+1)%models.length;
-return{text:answer,finishReason:c?.finishReason||'',model}
+return{
+text:answer,
+finishReason:c?.finishReason||'',
+model
+}
 }
 }
 
@@ -343,14 +449,16 @@ throw Error(msg)
 }
 
 if((r.status===500||r.status===503)&&retry===0){
-await sleep(1200);continue
+await sleep(1200);
+continue
 }
 
 throw Error(msg)
 
 }catch(e){
 if(retry===0&&/fetch|network|Failed to fetch/i.test(e.message)){
-await sleep(1200);continue
+await sleep(1200);
+continue
 }
 throw e
 }
@@ -362,86 +470,158 @@ throw Error('사용 가능한 모델의 사용량이 모두 부족합니다.')
 
 async function generateReply(){
 let work=[...history],out='',n=0;
+
 while(n<3){
-let r=await request(work);out+=r.text;
+let r=await request(work);
+out+=r.text;
+
 if(r.finishReason!=='MAX_TOKENS')break;
-work=[...work,
+
+work=[
+...work,
 {role:'model',parts:[{text:r.text}]},
 {role:'user',parts:[{text:'앞의 내용을 반복하지 말고 자연스럽게 이어서 완성해주세요.'}]}
-];n++
+];
+
+n++
 }
+
 return out
 }
 
 function saveChat(){
-try{localStorage.setItem(chatKey,JSON.stringify({history}))}catch(e){}
+try{
+localStorage.setItem(chatKey,JSON.stringify({history}))
+}catch(e){}
 }
 
 function loadChatLocal(){
 try{
 let d=JSON.parse(localStorage.getItem(chatKey)||'null');
-if(d?.history){history=d.history;render();return true}
+
+if(d?.history){
+history=d.history;
+render();
+return true
+}
 }catch(e){}
+
 return false
 }
 
 function render(){
 $('messages').innerHTML='';
-history.forEach(x=>addVisual(x.role==='user'?'user':'ai',x.parts?.[0]?.text||''));
+
+history.forEach(x=>
+addVisual(
+x.role==='user'?'user':'ai',
+x.parts?.[0]?.text||''
+)
+);
+
 $('turn').textContent=`${Math.floor(history.length/2)}턴 · 자동 저장됨`
 }
 
 function addVisual(role,t){
 let row=document.createElement('div');
 row.className='msg '+role;
+
 let b=document.createElement('div');
-b.className='bubble';b.textContent=t;
-row.appendChild(b);$('messages').appendChild(row);
+b.className='bubble';
+b.textContent=t;
+
+row.appendChild(b);
+$('messages').appendChild(row);
+
 window.scrollTo(0,document.body.scrollHeight)
 }
 
 function add(role,t){
-history.push({role,parts:[{text:t}]});
-addVisual(role==='user'?'user':'ai',t);saveChat()
+history.push({
+role,
+parts:[{text:t}]
+});
+
+addVisual(role==='user'?'user':'ai',t);
+saveChat()
 }
 
 function addError(msg,retry){
-let row=document.createElement('div');row.className='msg ai';
-let b=document.createElement('div');b.className='bubble';
-b.textContent='⚠️ '+msg;
-let x=document.createElement('button');x.className='retryBtn';x.textContent='재시도';
-x.onclick=async()=>{x.disabled=true;try{row.remove();await retry()}catch{}};
-b.appendChild(x);row.appendChild(b);$('messages').appendChild(row)
+let row=document.createElement('div');
+row.className='msg ai';
+
+let b=document.createElement('div');
+b.className='bubble';
+b.textContent='오류: '+msg;
+
+let x=document.createElement('button');
+x.className='retryBtn';
+x.textContent='재시도';
+
+x.onclick=async()=>{
+x.disabled=true;
+try{
+row.remove();
+await retry()
+}catch{}
+};
+
+b.appendChild(x);
+row.appendChild(b);
+$('messages').appendChild(row)
 }
 
 async function sendMessage(t){
 if(busy||!t.trim())return;
-busy=true;$('send').disabled=true;add('user',t);
+
+busy=true;
+$('send').disabled=true;
+add('user',t);
 
 let w=document.createElement('div');
-w.className='msg ai';w.innerHTML='<div class="bubble">생각 중…</div>';
+w.className='msg ai';
+w.innerHTML='<div class="bubble">생각 중…</div>';
 $('messages').appendChild(w);
 
 try{
-let r=await generateReply();w.remove();add('model',r)
+let r=await generateReply();
+w.remove();
+add('model',r)
 }catch(e){
-w.remove();addError(e.message,sendRetry)
+w.remove();
+addError(e.message,sendRetry)
 }finally{
-busy=false;$('send').disabled=false
+busy=false;
+$('send').disabled=false
 }
 }
 
 async function sendRetry(){
-if(busy)return;busy=true;
+if(busy)return;
+
+busy=true;
+
 let w=document.createElement('div');
-w.className='msg ai';w.innerHTML='<div class="bubble">다시 생각 중…</div>';
+w.className='msg ai';
+w.innerHTML='<div class="bubble">다시 생각 중…</div>';
 $('messages').appendChild(w);
 
 try{
-let r=await generateReply();w.remove();add('model',r)
+let r=await generateReply();
+w.remove();
+add('model',r)
 }catch(e){
-w.remove();addError(e.message,sendRetry)
-}finally{busy=false}
+w.remove();
+addError(e.message,sendRetry)
+}finally{
+busy=false
+}
+}
+
+function updateChatInfo(){
+$('chatLocation').textContent='위치: '+(text('location')||'설정되지 않음');
+$('chatTime').textContent='시간: '+(text('time')||'설정되지 않음');
+$('chatSituation').textContent='상황: '+(text('situation')||'설정되지 않음');
 }
 
 async function begin(){
@@ -452,38 +632,67 @@ $('setup').style.display='none';
 $('chat').classList.add('active');
 $('chatTitle').textContent=text('name');
 
+updateChatInfo();
+
 if(loadChatLocal())return;
 
 if(text('opening')){
 history=[{
 role:'user',
-parts:[{text:`[시작 상황]\n${text('opening')}\n\n이 장면에서 캐릭터로 먼저 말을 걸어줘.`}]
+parts:[{
+text:`[시작 상황]
+${text('opening')}
+
+현재 위치: ${text('location')}
+현재 시간: ${text('time')}
+현재 상황: ${text('situation')}
+
+이 장면에서 캐릭터로 먼저 말을 걸어줘.`
+}]
 }];
+
 saveChat();
 
 let w=document.createElement('div');
-w.className='msg ai';w.innerHTML='<div class="bubble">생각 중…</div>';
+w.className='msg ai';
+w.innerHTML='<div class="bubble">생각 중…</div>';
 $('messages').appendChild(w);
 
 try{
-let r=await generateReply();w.remove();add('model',r)
+let r=await generateReply();
+w.remove();
+add('model',r)
 }catch(e){
-w.remove();addError(e.message,beginRetry)
+w.remove();
+addError(e.message,beginRetry)
 }
 }
 }
 
 async function beginRetry(){
-try{add('model',await generateReply())}
-catch(e){addError(e.message,beginRetry)}
+try{
+add('model',await generateReply())
+}catch(e){
+addError(e.message,beginRetry)
+}
 }
 
 $('test').onclick=async()=>{
-let s=$('status');s.textContent='연결 테스트 중…';
+let s=$('status');
+s.textContent='연결 테스트 중…';
+
 try{
-await request([{role:'user',parts:[{text:'짧게 자기소개를 해줘.'}]}]);
+await request([
+{
+role:'user',
+parts:[{text:'짧게 자기소개를 해줘.'}]
+}
+]);
+
 s.textContent='연결 성공!'
-}catch(e){s.textContent='❌ '+e.message}
+}catch(e){
+s.textContent='오류: '+e.message
+}
 };
 
 $('start').onclick=begin;
@@ -491,16 +700,20 @@ $('start').onclick=begin;
 $('back').onclick=()=>{
 $('chat').classList.remove('active');
 $('setup').style.display='block';
-saveLocal();saveChat()
+saveLocal();
+saveChat()
 };
 
 $('send').onclick=()=>{
-let t=text('input');$('input').value='';sendMessage(t)
+let t=text('input');
+$('input').value='';
+sendMessage(t)
 };
 
 $('input').addEventListener('keydown',e=>{
 if(e.key==='Enter'&&!e.shiftKey){
-e.preventDefault();$('send').click()
+e.preventDefault();
+$('send').click()
 }
 });
 
@@ -509,7 +722,9 @@ $('cancel').onclick=()=>$('modal').classList.remove('show');
 
 $('yes').onclick=()=>{
 $('modal').classList.remove('show');
-history=[];localStorage.removeItem(chatKey);render()
+history=[];
+localStorage.removeItem(chatKey);
+render()
 };
 
 $('saveChat').onclick=()=>{
@@ -529,29 +744,46 @@ $('loadChat').onclick=()=>$('chatFile').click();
 $('chatFile').onchange=async e=>{
 try{
 let d=JSON.parse(await e.target.files[0].text());
-history=d.history||[];saveChat();render();
+history=d.history||[];
+saveChat();
+render();
 alert('대화를 복구했습니다.')
-}catch{alert('대화 파일을 읽지 못했습니다.')}
+}catch{
+alert('대화 파일을 읽지 못했습니다.')
+}
 e.target.value=''
 };
 
 /* 세계관 자료 */
 $('readWorld').onclick=async()=>{
 let url=text('worldUrl');
-if(!url)return $('worldStatus').textContent='링크를 입력해주세요.';
+
+if(!url)
+return $('worldStatus').textContent='링크를 입력해주세요.';
 
 $('worldStatus').textContent='자료 읽는 중…';
 
 try{
 let r=await fetch(url);
+
 if(!r.ok)throw Error();
 
-let doc=new DOMParser().parseFromString(await r.text(),'text/html');
-doc.querySelectorAll('script,style,noscript,svg').forEach(x=>x.remove());
+let doc=new DOMParser().parseFromString(
+await r.text(),
+'text/html'
+);
 
-let content=(doc.body?.innerText||'').replace(/\s+/g,' ').trim();
+doc.querySelectorAll('script,style,noscript,svg')
+.forEach(x=>x.remove());
+
+let content=(doc.body?.innerText||'')
+.replace(/\s+/g,' ')
+.trim();
+
 if(!content)throw Error();
-if(content.length>12000)content=content.slice(0,12000);
+
+if(content.length>12000)
+content=content.slice(0,12000);
 
 $('world').value=
 text('world')+
@@ -559,18 +791,24 @@ text('world')+
 '[외부 세계관 자료]\n'+content;
 
 saveLocal();
+
 $('worldStatus').textContent='세계관 자료를 추가했습니다.'
 }catch(e){
-$('worldStatus').textContent='읽지 못했습니다. 해당 사이트가 외부 접근을 막고 있을 수 있습니다.'
+$('worldStatus').textContent=
+'읽지 못했습니다. 해당 사이트가 외부 접근을 막고 있을 수 있습니다.'
 }
 };
 
 window.addEventListener('beforeunload',()=>{
-saveLocal();saveChat()
+saveLocal();
+saveChat()
 });
 
 document.addEventListener('visibilitychange',()=>{
-if(document.hidden){saveLocal();saveChat()}
+if(document.hidden){
+saveLocal();
+saveChat()
+}
 });
 
 loadLocal();
