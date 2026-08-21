@@ -1,3 +1,4 @@
+```html
 <!doctype html>
 <html lang="ko">
 <head>
@@ -5,338 +6,62 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#fff7fb">
 <title>ONE CHAT — 개인용</title>
-
 <style>
-:root{
---bg:#fff8fb;--card:#fff;--ink:#40353d;--muted:#9a8d96;
---line:#f0e2ea;--accent:#d98ab0;--danger:#c85e72;
-}
-
+:root{--bg:#fff8fb;--card:#fff;--ink:#40353d;--muted:#9a8d96;--line:#f0e2ea;--accent:#d98ab0;--danger:#c85e72}
 *{box-sizing:border-box}
-
-body{
-margin:0;
-background:linear-gradient(180deg,#fff8fb,#fff);
-color:var(--ink);
-font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif
-}
-
-button,input,textarea,select{font:inherit}
-button{cursor:pointer}
-
-.app{
-max-width:760px;
-margin:auto;
-padding:14px 14px 30px
-}
-
-.header{
-text-align:center;
-padding:10px 0 18px
-}
-
-.logo{
-font-weight:900;
-letter-spacing:.13em;
-font-size:28px
-}
-
-.sub{
-font-size:12px;
-color:var(--muted);
-margin-top:5px
-}
-
-.card{
-background:#fff;
-border:1px solid var(--line);
-border-radius:21px;
-padding:17px;
-margin:12px 0;
-box-shadow:0 10px 35px rgba(100,55,80,.06)
-}
-
-h2{
-font-size:17px;
-margin:0 0 5px
-}
-
-.hint,.notice{
-font-size:12px;
-color:var(--muted);
-line-height:1.55
-}
-
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px
-}
-
-.field{margin:10px 0}
-
-.field label{
-display:block;
-font-size:12px;
-font-weight:800;
-margin-bottom:6px
-}
-
-input,textarea,select{
-width:100%;
-border:1px solid var(--line);
-border-radius:13px;
-padding:11px;
-background:#fff;
-color:var(--ink);
-outline:none
-}
-
-textarea{
-min-height:90px;
-resize:vertical
-}
-
-.row{
-display:flex;
-gap:8px;
-flex-wrap:wrap;
-align-items:center
-}
-
-.btn{
-padding:10px 13px;
-border-radius:13px;
-border:1px solid var(--line);
-background:#fff;
-color:var(--ink)
-}
-
-.btn.primary,.start{
-background:var(--accent);
-color:#fff;
-border-color:var(--accent)
-}
-
+body{margin:0;background:linear-gradient(180deg,#fff8fb,#fff);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif}
+button,input,textarea{font:inherit}button{cursor:pointer}
+.app{max-width:760px;margin:auto;padding:14px 14px 30px}
+.header{text-align:center;padding:10px 0 18px}.logo{font-weight:900;letter-spacing:.13em;font-size:28px}.sub,.hint,.notice,.turn{font-size:12px;color:var(--muted)}
+.card{background:#fff;border:1px solid var(--line);border-radius:21px;padding:17px;margin:12px 0;box-shadow:0 10px 35px rgba(100,55,80,.06)}
+h2{font-size:17px;margin:0 0 5px}.hint,.notice{line-height:1.55}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{margin:10px 0}
+.field label{display:block;font-size:12px;font-weight:800;margin-bottom:6px}
+input,textarea{width:100%;border:1px solid var(--line);border-radius:13px;padding:11px;background:#fff;color:var(--ink);outline:none}
+textarea{min-height:90px;resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{padding:10px 13px;border-radius:13px;border:1px solid var(--line);background:#fff;color:var(--ink)}
+.btn.primary,.start{background:var(--accent);color:#fff;border-color:var(--accent)}
 .btn.danger{color:var(--danger)}
-
-.avatar{
-width:88px;
-height:88px;
-border-radius:23px;
-background:#fff3f8;
-border:1px dashed #e5cbd8;
-display:flex;
-align-items:center;
-justify-content:center;
-overflow:hidden;
-margin:9px 0
-}
-
-.avatar img,.mini img,.msgAvatar img{
-width:100%;
-height:100%;
-object-fit:cover
-}
-
+.avatar{width:88px;height:88px;border-radius:23px;background:#fff3f8;border:1px dashed #e5cbd8;display:flex;align-items:center;justify-content:center;overflow:hidden;margin:9px 0}
+.avatar img,.mini img,.msgAvatar img{width:100%;height:100%;object-fit:cover}
 .hidden{display:none!important}
-
-.start{
-width:100%;
-border:0;
-padding:15px;
-border-radius:17px;
-font-weight:900;
-font-size:16px;
-margin-top:9px
-}
-
-#chat{
-display:none;
-min-height:100vh
-}
-
-#chat.active{
-display:flex;
-flex-direction:column
-}
-
-.chatTop{
-position:sticky;
-top:0;
-z-index:3;
-display:flex;
-gap:9px;
-align-items:center;
-padding:8px 0 12px;
-background:rgba(255,248,251,.93);
-backdrop-filter:blur(10px)
-}
-
-.mini{
-width:44px;
-height:44px;
-border-radius:14px;
-overflow:hidden;
-background:#fff0f6;
-display:flex;
-align-items:center;
-justify-content:center
-}
-
-.chatName{font-weight:900}
-
-.turn{
-font-size:11px;
-color:var(--muted)
-}
-
-.messages{
-padding:6px 0 100px
-}
-
-.msg{
-display:flex;
-gap:8px;
-align-items:flex-end;
-margin:13px 0
-}
-
-.msg.user{justify-content:flex-end}
-
-.bubble{
-max-width:82%;
-padding:12px 14px;
-border-radius:18px;
-white-space:pre-wrap;
-word-break:break-word;
-line-height:1.65
-}
-
-.msg.ai .bubble{
-background:#fff;
-border:1px solid var(--line);
-border-bottom-left-radius:6px
-}
-
-.msg.user .bubble{
-background:var(--accent);
-color:#fff;
-border-bottom-right-radius:6px
-}
-
-.msgAvatar{
-width:32px;
-height:32px;
-border-radius:11px;
-overflow:hidden;
-background:#fff0f6;
-display:flex;
-align-items:center;
-justify-content:center;
-flex:none
-}
-
-.retryBtn{
-margin-top:8px;
-padding:7px 11px;
-border:1px solid var(--line);
-border-radius:10px;
-background:#fff;
-font-size:12px
-}
-
-.composer{
-position:fixed;
-bottom:var(--keyboard-offset,0px);
-left:50%;
-transform:translateX(-50%);
-width:min(760px,100%);
-padding:9px 14px calc(9px + env(safe-area-inset-bottom));
-background:rgba(255,248,251,.95);
-backdrop-filter:blur(12px);
-border-top:1px solid var(--line);
-display:flex;
-gap:8px;
-z-index:4;
-transition:bottom .15s ease
-}
-
-.composer textarea{
-min-height:46px;
-max-height:130px;
-resize:none;
-flex:1
-}
-
-.send{
-width:54px;
-border:0;
-border-radius:16px;
-background:var(--accent);
-color:#fff;
-font-weight:900
-}
-
-.modal{
-position:fixed;
-inset:0;
-background:rgba(40,25,35,.38);
-display:none;
-align-items:center;
-justify-content:center;
-padding:18px;
-z-index:10
-}
-
-.modal.show{display:flex}
-
-.modalBox{
-background:#fff;
-border-radius:22px;
-padding:20px;
-max-width:440px;
-width:100%;
-box-shadow:0 25px 80px rgba(0,0,0,.18)
-}
-
-@media(max-width:560px){
-.grid{grid-template-columns:1fr}
-.app{padding-left:12px;padding-right:12px}
-.card{padding:15px}
-}
+.start{width:100%;border:0;padding:15px;border-radius:17px;font-weight:900;font-size:16px;margin-top:9px}
+#chat{display:none;min-height:100vh}#chat.active{display:flex;flex-direction:column}
+.chatTop{position:sticky;top:0;z-index:3;display:flex;gap:9px;align-items:center;padding:8px 0 12px;background:rgba(255,248,251,.93);backdrop-filter:blur(10px)}
+.mini{width:44px;height:44px;border-radius:14px;overflow:hidden;background:#fff0f6;display:flex;align-items:center;justify-content:center}.chatName{font-weight:900}
+.messages{padding:6px 0 100px}.msg{display:flex;gap:8px;align-items:flex-end;margin:13px 0}.msg.user{justify-content:flex-end}
+.bubble{max-width:82%;padding:12px 14px;border-radius:18px;white-space:pre-wrap;word-break:break-word;line-height:1.65}
+.msg.ai .bubble{background:#fff;border:1px solid var(--line);border-bottom-left-radius:6px}.msg.user .bubble{background:var(--accent);color:#fff;border-bottom-right-radius:6px}
+.msgAvatar{width:32px;height:32px;border-radius:11px;overflow:hidden;background:#fff0f6;display:flex;align-items:center;justify-content:center;flex:none}
+.retryBtn{margin-top:8px;padding:7px 11px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:12px}
+.composer{position:fixed;bottom:var(--keyboard-offset,0px);left:50%;transform:translateX(-50%);width:min(760px,100%);padding:9px 14px calc(9px + env(safe-area-inset-bottom));background:rgba(255,248,251,.95);backdrop-filter:blur(12px);border-top:1px solid var(--line);display:flex;gap:8px;z-index:4}
+.composer textarea{min-height:46px;max-height:130px;resize:none;flex:1}.send{width:54px;border:0;border-radius:16px;background:var(--accent);color:#fff;font-weight:900}
+.modal{position:fixed;inset:0;background:rgba(40,25,35,.38);display:none;align-items:center;justify-content:center;padding:18px;z-index:10}.modal.show{display:flex}
+.modalBox{background:#fff;border-radius:22px;padding:20px;max-width:440px;width:100%;box-shadow:0 25px 80px rgba(0,0,0,.18)}
+@media(max-width:560px){.grid{grid-template-columns:1fr}.app{padding-left:12px;padding-right:12px}.card{padding:15px}}
 </style>
 </head>
 
 <body>
-
 <div class="app">
 
 <section id="setup">
-
-<div class="header">
-<div class="logo">ONE CHAT</div>
-<div class="sub">개인용 · 설정과 대화를 자동 저장합니다</div>
-</div>
+<div class="header"><div class="logo">ONE CHAT</div><div class="sub">개인용 · 설정과 대화를 자동 저장합니다</div></div>
 
 <div class="row" style="justify-content:center;margin-bottom:10px">
 <button class="btn" id="loadChar">💾 설정 불러오기</button>
 <button class="btn" id="saveChar">📦 설정 백업</button>
 <button class="btn" id="loadChat">💬 대화 복구</button>
 <button class="btn" id="saveChat">📜 대화 백업</button>
-
 <input id="charFile" type="file" accept=".json" class="hidden">
 <input id="chatFile" type="file" accept=".json" class="hidden">
 </div>
 
-
 <div class="card">
-
 <h2>🌷 캐릭터 설정</h2>
 <div class="hint">입력할 때마다 이 기기에 자동 저장됩니다.</div>
-
 <div class="avatar" id="charPrev">🖼️</div>
-
 <div class="row">
 <button class="btn" id="charUpload">이미지 업로드</button>
 <button class="btn danger" id="charRemove">삭제</button>
@@ -344,515 +69,168 @@ box-shadow:0 25px 80px rgba(0,0,0,.18)
 </div>
 
 <div class="grid">
-
-<div class="field">
-<label>이름 *</label>
-<input id="name" placeholder="예: 유진">
+<div class="field"><label>이름 *</label><input id="name" placeholder="예: 유진"></div>
+<div class="field"><label>성별</label><input id="gender"></div>
+<div class="field"><label>나이</label><input id="age"></div>
 </div>
 
-<div class="field">
-<label>성별</label>
-<input id="gender">
+<div class="field"><label>성격</label><textarea id="personality"></textarea></div>
+<div class="field"><label>말투 / 어미</label><textarea id="speech"></textarea></div>
+<div class="field"><label>말버릇 / 즐겨 쓰는 표현</label><textarea id="habits"></textarea></div>
+<div class="field"><label>절대 쓰지 않는 표현</label><textarea id="forbidden"></textarea></div>
+<div class="field"><label>캐릭터 서사 / 배경</label><textarea id="backstory"></textarea></div>
+<div class="field"><label>세계관 / 무대</label><textarea id="world"></textarea></div>
 </div>
-
-<div class="field">
-<label>나이</label>
-<input id="age">
-</div>
-
-<div class="field">
-<label>모델</label>
-<select id="model">
-<option value="gemini-3.7-flash">Gemini 3.7 Flash</option>
-<option value="gemini-3.1-pro-preview">Gemini 3.1 Pro</option>
-</select>
-</div>
-
-</div>
-
-<div class="field">
-<label>성격</label>
-<textarea id="personality"></textarea>
-</div>
-
-<div class="field">
-<label>말투 / 어미</label>
-<textarea id="speech"></textarea>
-</div>
-
-<div class="field">
-<label>말버릇 / 즐겨 쓰는 표현</label>
-<textarea id="habits"></textarea>
-</div>
-
-<div class="field">
-<label>절대 쓰지 않는 표현</label>
-<textarea id="forbidden"></textarea>
-</div>
-
-<div class="field">
-<label>캐릭터 서사 / 배경</label>
-<textarea id="backstory"></textarea>
-</div>
-
-<div class="field">
-<label>세계관 / 무대</label>
-<textarea id="world"></textarea>
-</div>
-
-</div>
-
 
 <div class="card">
-
 <h2>💗 유저 설정</h2>
-
 <div class="avatar" id="userPrev">🖼️</div>
-
 <div class="row">
 <button class="btn" id="userUpload">이미지 업로드</button>
 <button class="btn danger" id="userRemove">삭제</button>
 <input id="userImg" type="file" accept="image/*" class="hidden">
 </div>
-
-<div class="field">
-<label>유저 호칭</label>
-<input id="call">
+<div class="field"><label>유저 호칭</label><input id="call"></div>
+<div class="field"><label>유저 정보 / 관계</label><textarea id="userInfo"></textarea></div>
 </div>
-
-<div class="field">
-<label>유저 정보 / 관계</label>
-<textarea id="userInfo"></textarea>
-</div>
-
-</div>
-
 
 <div class="card">
-
 <h2>🎬 시작 상황</h2>
 <textarea id="opening" placeholder="첫 장면을 적어주세요."></textarea>
-
 </div>
 
-
 <div class="card">
-
 <h2>🔑 Gemini API</h2>
-
 <input id="apiKey" type="password" placeholder="API 키를 입력하세요">
-
-<div class="notice">
-API 키는 설정 백업 파일에 포함하지 않습니다.
-</div>
-
-<button class="btn" id="test" style="margin-top:10px">
-🔌 연결 테스트
-</button>
-
+<div class="notice">API 키는 설정 백업 파일에 포함하지 않습니다.</div>
+<button class="btn" id="test" style="margin-top:10px">🔌 연결 테스트</button>
 <div id="status" class="notice" style="margin-top:8px"></div>
-
 </div>
-
 
 <div class="card">
-
 <h2>👤 프로필 사진 표시</h2>
-
 <div class="row">
-
-<button class="btn primary" id="profileOn">
-프로필 표시
-</button>
-
-<button class="btn" id="profileOff">
-프로필 숨기기
-</button>
-
+<button class="btn primary" id="profileOn">프로필 표시</button>
+<button class="btn" id="profileOff">프로필 숨기기</button>
+</div>
+<div class="hint" style="margin-top:7px">채팅 화면에서 캐릭터와 유저의 프로필 사진 표시 여부를 선택합니다.</div>
 </div>
 
-<div class="hint" style="margin-top:7px">
-채팅 화면에서 캐릭터와 유저의 프로필 사진 표시 여부를 선택합니다.
-</div>
-
-</div>
-
-
-<button class="start" id="start">
-💌 대화 시작
-</button>
-
+<button class="start" id="start">💌 대화 시작</button>
 </section>
-
 
 <section id="chat">
-
 <div class="chatTop">
-
 <button class="btn" id="back">설정</button>
-
 <div class="mini" id="chatPrev">🌷</div>
-
-<div>
-<div class="chatName" id="chatTitle">캐릭터</div>
-<div class="turn" id="turn">자동 저장됨</div>
+<div><div class="chatName" id="chatTitle">캐릭터</div><div class="turn" id="turn">자동 저장됨</div></div>
+<button class="btn" id="new" style="margin-left:auto">새 대화</button>
 </div>
-
-<button class="btn" id="new" style="margin-left:auto">
-새 대화
-</button>
-
-</div>
-
 <div class="messages" id="messages"></div>
-
-<div class="composer" id="composer">
-
+<div class="composer">
 <textarea id="input" placeholder="메시지를 입력하세요..." rows="1"></textarea>
-
-<button class="send" id="send">
-전송
-</button>
-
+<button class="send" id="send">전송</button>
 </div>
-
 </section>
-
 </div>
-
 
 <div class="modal" id="modal">
-
 <div class="modalBox">
-
 <h3>새 대화를 시작할까요?</h3>
-
-<p class="hint">
-현재 대화만 삭제합니다. 캐릭터 설정은 남습니다.
-</p>
-
+<p class="hint">현재 대화만 삭제합니다. 캐릭터 설정은 남습니다.</p>
 <div class="row" style="justify-content:flex-end">
-
-<button class="btn" id="cancel">
-취소
-</button>
-
-<button class="btn primary" id="yes">
-삭제하고 시작
-</button>
-
+<button class="btn" id="cancel">취소</button>
+<button class="btn primary" id="yes">삭제하고 시작</button>
 </div>
-
 </div>
-
 </div>
-
 
 <script>
-
-const ids=[
-'name','gender','age','model','personality','speech',
-'habits','forbidden','backstory','world','call',
-'userInfo','opening'
-];
-
-let charImage='';
-let userImage='';
-let history=[];
-let busy=false;
-let profileVisible=true;
-
-const $=id=>document.getElementById(id);
-
-const key='onechat_v2_settings';
-const chatKey='onechat_v2_chat';
-
-
-function text(id){
-return $(id).value.trim();
-}
-
+const ids=['name','gender','age','personality','speech','habits','forbidden','backstory','world','call','userInfo','opening'];
+const MODELS=['gemini-2.5-flash','gemini-3.1-flash-lite'];
+let currentModel=0,charImage='',userImage='',history=[],busy=false,profileVisible=true;
+const $=id=>document.getElementById(id),key='onechat_v3_settings',chatKey='onechat_v3_chat';
+const text=id=>$(id).value.trim();
 
 function compress(file){
-
 return new Promise((resolve,reject)=>{
-
 const r=new FileReader();
-
-r.onload=()=>{
-
-const im=new Image();
-
-im.onload=()=>{
-
-const m=420/Math.max(im.width,im.height);
-const s=Math.min(1,m);
-
-const c=document.createElement('canvas');
-
-c.width=im.width*s;
-c.height=im.height*s;
-
-c.getContext('2d').drawImage(
-im,0,0,c.width,c.height
-);
-
-resolve(
-c.toDataURL('image/jpeg',.82)
-);
-
-};
-
-im.onerror=reject;
-im.src=r.result;
-
-};
-
-r.onerror=reject;
-r.readAsDataURL(file);
-
+r.onload=()=>{const im=new Image();im.onload=()=>{
+const s=Math.min(1,420/Math.max(im.width,im.height)),c=document.createElement('canvas');
+c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+resolve(c.toDataURL('image/jpeg',.82));};im.onerror=reject;im.src=r.result};
+r.onerror=reject;r.readAsDataURL(file);
 });
-
 }
-
 
 function settings(){
-
-let o={};
-
-ids.forEach(i=>o[i]=text(i));
-
-o.charImage=charImage;
-o.userImage=userImage;
-o.profileVisible=profileVisible;
-
-return o;
-
+let o={};ids.forEach(i=>o[i]=text(i));
+o.charImage=charImage;o.userImage=userImage;o.profileVisible=profileVisible;return o;
 }
-
 
 function apply(o){
-
-ids.forEach(i=>{
-
-if(o[i]!==undefined)
-$(i).value=o[i];
-
-});
-
-charImage=o.charImage||'';
-userImage=o.userImage||'';
-
-if(o.profileVisible!==undefined)
-profileVisible=o.profileVisible;
-
+ids.forEach(i=>{if(o[i]!==undefined)$(i).value=o[i]});
+charImage=o.charImage||'';userImage=o.userImage||'';
+if(o.profileVisible!==undefined)profileVisible=o.profileVisible;
 preview();
-
 }
-
 
 function preview(){
-
-$('charPrev').innerHTML=
-charImage?`<img src="${charImage}">`:'🖼️';
-
-$('userPrev').innerHTML=
-userImage?`<img src="${userImage}">`:'🖼️';
-
-$('chatPrev').innerHTML=
-charImage?`<img src="${charImage}">`:'🌷';
-
-updateProfileButtons();
-
+$('charPrev').innerHTML=charImage?`<img src="${charImage}">`:'🖼️';
+$('userPrev').innerHTML=userImage?`<img src="${userImage}">`:'🖼️';
+$('chatPrev').innerHTML=charImage?`<img src="${charImage}">`:'🌷';
+$('profileOn').classList.toggle('primary',profileVisible);
+$('profileOff').classList.toggle('primary',!profileVisible);
 }
-
-
-function updateProfileButtons(){
-
-$('profileOn').classList.toggle(
-'primary',
-profileVisible
-);
-
-$('profileOff').classList.toggle(
-'primary',
-!profileVisible
-);
-
-}
-
 
 function saveLocal(){
-
-try{
-
-localStorage.setItem(
-key,
-JSON.stringify(settings())
-);
-
-}catch(e){
-
-$('status').textContent=
-'⚠️ 저장 공간이 부족합니다. 이미지 크기를 줄이거나 백업을 이용하세요.';
-
+try{localStorage.setItem(key,JSON.stringify(settings()))}
+catch{$('status').textContent='⚠️ 저장 공간이 부족합니다.'}
 }
-
-}
-
 
 function loadLocal(){
-
-try{
-
-const s=localStorage.getItem(key);
-
-if(s)
-apply(JSON.parse(s));
-
-}catch(e){}
-
+try{const s=localStorage.getItem(key);if(s)apply(JSON.parse(s))}catch{}
 }
 
-
-ids.forEach(i=>{
-$(i).addEventListener('input',saveLocal);
-});
-
+ids.forEach(i=>$(i).addEventListener('input',saveLocal));
 
 $('charUpload').onclick=()=>$('charImg').click();
 $('userUpload').onclick=()=>$('userImg').click();
 
-
 $('charImg').onchange=async e=>{
-
-if(e.target.files[0]){
-
-charImage=await compress(e.target.files[0]);
-
-preview();
-saveLocal();
-
-}
-
+if(e.target.files[0]){charImage=await compress(e.target.files[0]);preview();saveLocal()}
 };
-
 
 $('userImg').onchange=async e=>{
-
-if(e.target.files[0]){
-
-userImage=await compress(e.target.files[0]);
-
-preview();
-saveLocal();
-
-}
-
+if(e.target.files[0]){userImage=await compress(e.target.files[0]);preview();saveLocal()}
 };
 
+$('charRemove').onclick=()=>{charImage='';preview();saveLocal()};
+$('userRemove').onclick=()=>{userImage='';preview();saveLocal()};
 
-$('charRemove').onclick=()=>{
-
-charImage='';
-preview();
-saveLocal();
-
-};
-
-
-$('userRemove').onclick=()=>{
-
-userImage='';
-preview();
-saveLocal();
-
-};
-
-
-$('profileOn').onclick=()=>{
-
-profileVisible=true;
-preview();
-saveLocal();
-render();
-
-};
-
-
-$('profileOff').onclick=()=>{
-
-profileVisible=false;
-preview();
-saveLocal();
-render();
-
-};
-
+$('profileOn').onclick=()=>{profileVisible=true;preview();saveLocal();render()};
+$('profileOff').onclick=()=>{profileVisible=false;preview();saveLocal();render()};
 
 function download(data,name){
-
 const a=document.createElement('a');
-
-a.href=URL.createObjectURL(
-new Blob([data],{type:'application/json'})
-);
-
-a.download=name;
-a.click();
-
-setTimeout(
-()=>URL.revokeObjectURL(a.href),
-500
-);
-
+a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
+a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);
 }
 
-
 $('saveChar').onclick=()=>{
-
-const o=settings();
-
-delete o.apiKey;
-
-download(
-JSON.stringify(o,null,2),
-(text('name')||'character')+'-settings.json'
-);
-
+const o=settings();delete o.apiKey;
+download(JSON.stringify(o,null,2),(text('name')||'character')+'-settings.json');
 };
-
 
 $('loadChar').onclick=()=>$('charFile').click();
 
-
 $('charFile').onchange=async e=>{
-
-try{
-
-apply(
-JSON.parse(
-await e.target.files[0].text()
-)
-);
-
-saveLocal();
-
-alert('설정을 불러왔습니다.');
-
-}catch{
-
-alert('설정 파일을 읽지 못했습니다.');
-
-}
-
+try{apply(JSON.parse(await e.target.files[0].text()));saveLocal();alert('설정을 불러왔습니다.')}
+catch{alert('설정 파일을 읽지 못했습니다.')}
 e.target.value='';
-
 };
 
-
 function system(){
-
 return `당신은 "${text('name')||'캐릭터'}"이다.
 
 아래 캐릭터 설정을 최우선으로 유지한다.
@@ -888,902 +266,264 @@ ${text('userInfo')}
 ${text('opening')}
 
 실제 대화처럼 자연스럽게 답한다.
-
 캐릭터의 말투와 성격을 일관되게 유지한다.
-
-대사는 캐릭터의 성격에 맞게 작성한다.
-
-지문은 단순히 행동만 나열하지 말고 표정, 시선, 몸짓, 자세, 목소리의 변화, 감정, 주변 상황 등을 적절히 활용하여 구체적으로 묘사한다.
-
 대사와 지문을 자연스럽게 섞어 장면이 눈앞에 보이는 것처럼 작성한다.
-
-답변은 지나치게 짧게 끝내지 말고 충분한 분량으로 작성한다.
-
+지문에는 표정, 시선, 몸짓, 자세, 감정 등을 적절히 활용한다.
+지나치게 짧게 답하지 않는다.
 문장을 작성하다가 갑자기 끊지 않는다.
-
 반드시 완성된 문장으로 답변을 끝낸다.
-
 이전 대화의 맥락과 관계를 기억하면서 자연스럽게 이어간다.`;
-
 }
 
-
-function sleep(ms){
-
-return new Promise(
-resolve=>setTimeout(resolve,ms)
-);
-
-}
-
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
 async function request(contents){
-
 const k=text('apiKey');
+if(!k)throw Error('API 키를 입력해주세요.');
 
-if(!k)
-throw Error('API 키를 입력해주세요.');
+for(let mi=currentModel;mi<MODELS.length;mi++){
+const m=MODELS[mi];
 
-const m=text('model');
-
-const body={
-systemInstruction:{
-parts:[{text:system()}]
-},
-
-contents,
-
-generationConfig:{
-temperature:1,
-maxOutputTokens:2500
-}
-
-};
-
-const maxRetry=3;
-
-for(let attempt=0;attempt<maxRetry;attempt++){
-
+for(let attempt=0;attempt<3;attempt++){
 try{
-
 const r=await fetch(
 `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent`,
 {
 method:'POST',
-
-headers:{
-'Content-Type':'application/json',
-'x-goog-api-key':k
-},
-
-body:JSON.stringify(body)
+headers:{'Content-Type':'application/json','x-goog-api-key':k},
+body:JSON.stringify({
+systemInstruction:{parts:[{text:system()}]},
+contents,
+generationConfig:{temperature:1,maxOutputTokens:2500}
+})
 }
 );
 
-let d={};
-
-try{
-d=await r.json();
-}catch{}
+let d={};try{d=await r.json()}catch{}
 
 if(r.ok){
-
-const candidate=d?.candidates?.[0];
-
-const parts=candidate?.content?.parts||[];
-
-const answer=parts
-.map(x=>x.text||'')
-.join('');
-
+const c=d?.candidates?.[0],answer=(c?.content?.parts||[]).map(x=>x.text||'').join('');
 if(answer.trim()){
-
-return{
-text:answer,
-finishReason:candidate?.finishReason||''
-};
-
+currentModel=mi;
+return{text:answer,finishReason:c?.finishReason||''};
 }
-
-if(attempt<maxRetry-1){
-
-await sleep(1500*(attempt+1));
-continue;
-
-}
-
+if(attempt<2){await sleep(1500*(attempt+1));continue}
 throw Error('응답이 비어 있습니다.');
-
 }
 
 const status=d?.error?.status||'API 오류';
 const message=d?.error?.message||'요청에 실패했습니다.';
+const quota=r.status===429||status==='RESOURCE_EXHAUSTED'||/quota|rate.?limit|resource.?exhausted/i.test(message);
 
-if(
-(r.status===503||
-r.status===500||
-r.status===429)
-&&attempt<maxRetry-1
-){
+if(quota)break;
 
-await sleep(2000*(attempt+1));
-continue;
-
+if((r.status===500||r.status===503)&&attempt<2){
+await sleep(2000*(attempt+1));continue;
 }
 
 throw Error(`${status}: ${message}`);
 
 }catch(e){
-
-if(
-attempt<maxRetry-1&&
-(e.name==='TypeError'||
-/fetch|network|networkerror/i.test(e.message))
-){
-
-await sleep(2000*(attempt+1));
-continue;
-
+if(attempt<2&&(e.name==='TypeError'||/fetch|network|networkerror/i.test(e.message))){
+await sleep(2000*(attempt+1));continue;
 }
-
 throw e;
-
+}
+}
 }
 
+currentModel=0;
+throw Error('⚠️ 사용할 수 있는 모델의 사용량이 모두 초과되었습니다.');
 }
-
-throw Error(
-'Gemini 요청에 실패했습니다. 잠시 후 다시 시도해주세요.'
-);
-
-}
-
 
 async function generateReply(){
-
-let working=[...history];
-
-let combined='';
-let chunks=0;
+let working=[...history],combined='',chunks=0;
 
 while(chunks<3){
-
-const result=await request(working);
-
-combined+=result.text;
-
-if(result.finishReason!=='MAX_TOKENS')
-break;
+const r=await request(working);
+combined+=r.text;
+if(r.finishReason!=='MAX_TOKENS')break;
 
 chunks++;
-
 working=[
 ...working,
-{
-role:'model',
-parts:[{text:result.text}]
-},
-{
-role:'user',
-parts:[{
-text:
-'방금 답변이 생성 도중 잘렸습니다. '+
-'앞의 내용을 반복하지 말고 자연스럽게 이어서 작성해주세요. '+
-'문장 중간이 아니라 완성된 문장으로 끝내주세요.'
-}]
-}
+{role:'model',parts:[{text:r.text}]},
+{role:'user',parts:[{text:'방금 답변이 생성 도중 잘렸습니다. 앞의 내용을 반복하지 말고 자연스럽게 이어서 작성해주세요. 완성된 문장으로 끝내주세요.'}]}
 ];
-
 }
-
 return combined;
-
 }
-
 
 function saveChat(){
-
-try{
-
-localStorage.setItem(
-chatKey,
-JSON.stringify({
-history,
-turn:history.length
-})
-);
-
-}catch(e){}
-
+try{localStorage.setItem(chatKey,JSON.stringify({history,turn:history.length}))}catch{}
 }
-
 
 function loadChatLocal(){
-
 try{
-
-const d=JSON.parse(
-localStorage.getItem(chatKey)||'null'
-);
-
-if(d?.history){
-
-history=d.history;
-render();
-
-return true;
-
-}
-
-}catch(e){}
-
+const d=JSON.parse(localStorage.getItem(chatKey)||'null');
+if(d?.history){history=d.history;render();return true}
+}catch{}
 return false;
-
 }
-
 
 function render(){
-
-const box=$('messages');
-
-box.innerHTML='';
-
-history.forEach(x=>{
-
-addVisual(
-x.role==='user'?'user':'ai',
-x.parts?.[0]?.text||x.text||''
-);
-
-});
-
-$('turn').textContent=
-`${Math.floor(history.length/2)}턴 · 자동 저장됨`;
-
+$('messages').innerHTML='';
+history.forEach(x=>addVisual(x.role==='user'?'user':'ai',x.parts?.[0]?.text||x.text||''));
+$('turn').textContent=`${Math.floor(history.length/2)}턴 · 자동 저장됨`;
 }
-
 
 function addVisual(role,t){
-
 const row=document.createElement('div');
+row.className='msg '+role;
 
-row.className='msg '+(
-role==='user'?'user':'ai'
-);
-
-
-if(profileVisible){
-
-const av=document.createElement('div');
-
-av.className='msgAvatar';
-
-const im=
-role==='user'?userImage:charImage;
-
-av.innerHTML=
-im
-?`<img src="${im}">`
-:(role==='user'?'♡':'🌷');
-
-if(role!=='user')
-row.appendChild(av);
-
+if(profileVisible&&role!=='user'){
+const av=document.createElement('div');av.className='msgAvatar';
+av.innerHTML=charImage?`<img src="${charImage}">`:'🌷';row.appendChild(av);
 }
 
+const b=document.createElement('div');b.className='bubble';b.textContent=t;row.appendChild(b);
 
-const b=document.createElement('div');
-
-b.className='bubble';
-b.textContent=t;
-
-
-if(role==='user'){
-
-row.appendChild(b);
-
-if(profileVisible){
-
-const av=document.createElement('div');
-
-av.className='msgAvatar';
-
-const im=userImage;
-
-av.innerHTML=
-im
-?`<img src="${im}">`
-:'♡';
-
-row.appendChild(av);
-
+if(profileVisible&&role==='user'){
+const av=document.createElement('div');av.className='msgAvatar';
+av.innerHTML=userImage?`<img src="${userImage}">`:'♡';row.appendChild(av);
 }
-
-}else{
-
-row.appendChild(b);
-
-}
-
 
 $('messages').appendChild(row);
-
-window.scrollTo(
-0,
-document.body.scrollHeight
-);
-
+window.scrollTo(0,document.body.scrollHeight);
 }
-
 
 function add(role,t){
-
-history.push({
-role,
-parts:[{text:t}]
-});
-
-addVisual(
-role==='user'?'user':'ai',
-t
-);
-
-saveChat();
-
+history.push({role,parts:[{text:t}]});
+addVisual(role==='user'?'user':'ai',t);saveChat();
 }
 
-
-function addError(message,retryFunction){
-
-const row=document.createElement('div');
-
-row.className='msg ai';
-
+function addError(message,retry){
+const row=document.createElement('div');row.className='msg ai';
 if(profileVisible){
-
-const av=document.createElement('div');
-
-av.className='msgAvatar';
-av.textContent='🌷';
-
-row.appendChild(av);
-
+const av=document.createElement('div');av.className='msgAvatar';av.textContent='🌷';row.appendChild(av);
 }
-
-const box=document.createElement('div');
-
-box.className='bubble';
-
-const textEl=document.createElement('div');
-
-textEl.textContent='⚠️ '+message;
-
-const btn=document.createElement('button');
-
-btn.className='retryBtn';
-btn.textContent='↻ 재시도';
-
+const box=document.createElement('div');box.className='bubble';
+const tx=document.createElement('div');tx.textContent='⚠️ '+message;
+const btn=document.createElement('button');btn.className='retryBtn';btn.textContent='↻ 재시도';
 btn.onclick=async()=>{
-
-btn.disabled=true;
-btn.textContent='재시도 중…';
-
-try{
-
-row.remove();
-
-await retryFunction();
-
-}catch(e){
-
-btn.disabled=false;
-btn.textContent='↻ 재시도';
-
-}
-
+btn.disabled=true;btn.textContent='재시도 중…';
+try{row.remove();await retry()}catch{btn.disabled=false;btn.textContent='↻ 재시도'}
 };
-
-box.appendChild(textEl);
-box.appendChild(btn);
-
-row.appendChild(box);
-
-$('messages').appendChild(row);
-
-window.scrollTo(
-0,
-document.body.scrollHeight
-);
-
+box.append(tx,btn);row.appendChild(box);$('messages').appendChild(row);
 }
-
 
 async function sendMessage(t){
+if(busy||!t.trim())return;
+busy=true;$('send').disabled=true;add('user',t);
 
-if(busy||!t.trim())
-return;
-
-busy=true;
-
-$('send').disabled=true;
-
-add('user',t);
-
-const wait=document.createElement('div');
-
-wait.className='msg ai';
-
-wait.innerHTML=
-'<div class="msgAvatar">🌷</div>'+
-'<div class="bubble">생각 중…</div>';
-
-if(!profileVisible)
-wait.innerHTML='<div class="bubble">생각 중…</div>';
-
+const wait=document.createElement('div');wait.className='msg ai';
+wait.innerHTML=profileVisible?'<div class="msgAvatar">🌷</div><div class="bubble">생각 중…</div>':'<div class="bubble">생각 중…</div>';
 $('messages').appendChild(wait);
 
-try{
-
-const reply=await generateReply();
-
-wait.remove();
-
-add('model',reply);
-
-}catch(e){
-
-wait.remove();
-
-addError(
-e.message,
-async()=>{
-await sendRetry();
+try{const reply=await generateReply();wait.remove();add('model',reply)}
+catch(e){wait.remove();addError(e.message,sendRetry)}
+finally{busy=false;$('send').disabled=false;$('input').focus()}
 }
-);
-
-}finally{
-
-busy=false;
-$('send').disabled=false;
-
-setTimeout(
-()=>$('input').focus(),
-50
-);
-
-}
-
-}
-
 
 async function sendRetry(){
-
-if(busy)
-return;
-
+if(busy)return;
 busy=true;
+if(history[history.length-1]?.role!=='user'){busy=false;return}
 
-const last=history[history.length-1];
-
-if(!last||last.role!=='user'){
-
-busy=false;
-return;
-
-}
-
-const wait=document.createElement('div');
-
-wait.className='msg ai';
-
-wait.innerHTML=
-'<div class="msgAvatar">🌷</div>'+
-'<div class="bubble">다시 생각 중…</div>';
-
-if(!profileVisible)
-wait.innerHTML='<div class="bubble">다시 생각 중…</div>';
-
+const wait=document.createElement('div');wait.className='msg ai';
+wait.innerHTML=profileVisible?'<div class="msgAvatar">🌷</div><div class="bubble">다시 생각 중…</div>':'<div class="bubble">다시 생각 중…</div>';
 $('messages').appendChild(wait);
 
-try{
-
-const reply=await generateReply();
-
-wait.remove();
-
-add('model',reply);
-
-}catch(e){
-
-wait.remove();
-
-addError(
-e.message,
-async()=>{
-
-await sendRetry();
-
+try{const reply=await generateReply();wait.remove();add('model',reply)}
+catch(e){wait.remove();addError(e.message,sendRetry)}
+finally{busy=false}
 }
-);
-
-}finally{
-
-busy=false;
-
-}
-
-}
-
 
 async function begin(){
+if(!text('name'))return alert('캐릭터 이름을 입력해주세요.');
+if(!text('apiKey'))return alert('Gemini API 키를 입력해주세요.');
 
-if(!text('name')){
-
-alert('캐릭터 이름을 입력해주세요.');
-return;
-
-}
-
-if(!text('apiKey')){
-
-alert('Gemini API 키를 입력해주세요.');
-return;
-
-}
-
-$('setup').style.display='none';
-$('chat').classList.add('active');
-
-$('chatTitle').textContent=text('name');
-
-preview();
+$('setup').style.display='none';$('chat').classList.add('active');
+$('chatTitle').textContent=text('name');preview();
 
 if(!loadChatLocal()&&text('opening')){
-
-history=[
-
-{
-role:'user',
-parts:[
-{
-text:
-`[시작 상황]
-${text('opening')}
-
-이 장면에서 캐릭터로 먼저 말을 걸어줘.
-지문과 대사를 충분히 자세하게 작성해줘.`
-}
-]
-}
-
-];
-
+history=[{role:'user',parts:[{text:`[시작 상황]\n${text('opening')}\n\n이 장면에서 캐릭터로 먼저 말을 걸어줘. 지문과 대사를 충분히 자세하게 작성해줘.`}]}];
 saveChat();
 
-const wait=document.createElement('div');
-
-wait.className='msg ai';
-
-wait.innerHTML=
-'<div class="msgAvatar">🌷</div>'+
-'<div class="bubble">생각 중…</div>';
-
-if(!profileVisible)
-wait.innerHTML='<div class="bubble">생각 중…</div>';
-
+const wait=document.createElement('div');wait.className='msg ai';
+wait.innerHTML=profileVisible?'<div class="msgAvatar">🌷</div><div class="bubble">생각 중…</div>':'<div class="bubble">생각 중…</div>';
 $('messages').appendChild(wait);
 
-try{
-
-const r=await generateReply();
-
-wait.remove();
-
-add('model',r);
-
-}catch(e){
-
-wait.remove();
-
-addError(
-e.message,
-async()=>{
-
-await beginRetry();
-
+try{const r=await generateReply();wait.remove();add('model',r)}
+catch(e){wait.remove();addError(e.message,async()=>{try{const r=await generateReply();add('model',r)}catch(x){addError(x.message,arguments.callee)}})}
 }
-);
-
 }
-
-}
-
-}
-
-
-async function beginRetry(){
-
-try{
-
-const r=await generateReply();
-
-add('model',r);
-
-}catch(e){
-
-addError(
-e.message,
-async()=>{
-
-await beginRetry();
-
-}
-);
-
-}
-
-}
-
 
 $('test').onclick=async()=>{
-
-const s=$('status');
-
-s.textContent='연결 테스트 중…';
-
+const s=$('status');s.textContent='연결 테스트 중…';
 try{
-
-const old=history;
-
-history=[];
-
-await request([
-{
-role:'user',
-parts:[
-{
-text:'짧게 자기소개를 해줘.'
-}
-]
-}
-]);
-
+const old=history;history=[];
+await request([{role:'user',parts:[{text:'짧게 자기소개를 해줘.'}]}]);
 history=old;
-
-s.textContent=
-'✅ 연결 성공! Gemini가 정상적으로 응답했습니다.';
-
-}catch(e){
-
-s.textContent='❌ '+e.message;
-
-}
-
+s.textContent=`✅ 연결 성공 · ${MODELS[currentModel]}`;
+}catch(e){s.textContent='❌ '+e.message}
 };
-
 
 $('start').onclick=begin;
 
-
 $('back').onclick=()=>{
-
-$('chat').classList.remove('active');
-$('setup').style.display='block';
-
-saveLocal();
-saveChat();
-
+$('chat').classList.remove('active');$('setup').style.display='block';saveLocal();saveChat();
 };
 
+$('send').onclick=()=>{const t=text('input');$('input').value='';sendMessage(t)};
 
-$('send').onclick=()=>{
-
-const t=text('input');
-
-$('input').value='';
-
-sendMessage(t);
-
-};
-
-
-$('input').addEventListener(
-'keydown',
-e=>{
-
-if(
-e.key==='Enter'&&
-!e.shiftKey
-){
-
-e.preventDefault();
-
-$('send').click();
-
-}
-
-}
-);
-
+$('input').addEventListener('keydown',e=>{
+if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('send').click()}
+});
 
 $('new').onclick=()=>$('modal').classList.add('show');
-
-
 $('cancel').onclick=()=>$('modal').classList.remove('show');
 
-
 $('yes').onclick=()=>{
-
-$('modal').classList.remove('show');
-
-history=[];
-
-localStorage.removeItem(chatKey);
-
-render();
-
+$('modal').classList.remove('show');history=[];localStorage.removeItem(chatKey);render();
 };
-
 
 $('saveChat').onclick=()=>{
-
-download(
-JSON.stringify(
-{
-version:3,
-savedAt:new Date().toISOString(),
-character:text('name'),
-history
-},
-null,
-2
-),
-(text('name')||'chat')+'-conversation.json'
-);
-
+download(JSON.stringify({version:4,savedAt:new Date().toISOString(),character:text('name'),history},null,2),(text('name')||'chat')+'-conversation.json');
 };
-
 
 $('loadChat').onclick=()=>$('chatFile').click();
 
-
 $('chatFile').onchange=async e=>{
-
 try{
-
-const d=JSON.parse(
-await e.target.files[0].text()
-);
-
-history=d.history||[];
-
-saveChat();
-
-alert('대화를 복구했습니다.');
-
-}catch{
-
-alert('대화 백업 파일을 읽지 못했습니다.');
-
-}
-
+const d=JSON.parse(await e.target.files[0].text());history=d.history||[];saveChat();render();alert('대화를 복구했습니다.');
+}catch{alert('대화 백업 파일을 읽지 못했습니다.')}
 e.target.value='';
-
 };
 
-
-window.addEventListener(
-'beforeunload',
-()=>{
-saveLocal();
-saveChat();
-}
-);
-
-
-document.addEventListener(
-'visibilitychange',
-()=>{
-
-if(document.hidden){
-
-saveLocal();
-saveChat();
-
-}
-
-}
-);
-
-
-/* 키보드 위치 */
+window.addEventListener('beforeunload',()=>{saveLocal();saveChat()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){saveLocal();saveChat()}});
 
 function updateKeyboardPosition(){
-
 const vv=window.visualViewport;
-
-if(!vv){
-
-document.documentElement.style
-.setProperty('--keyboard-offset','0px');
-
-return;
-
+const o=vv?Math.max(0,window.innerHeight-vv.height-vv.offsetTop):0;
+document.documentElement.style.setProperty('--keyboard-offset',`${o}px`);
 }
-
-const offset=Math.max(
-0,
-window.innerHeight-vv.height-vv.offsetTop
-);
-
-document.documentElement.style
-.setProperty(
-'--keyboard-offset',
-`${offset}px`
-);
-
-}
-
 
 if(window.visualViewport){
-
-window.visualViewport.addEventListener(
-'resize',
-updateKeyboardPosition
-);
-
-window.visualViewport.addEventListener(
-'scroll',
-updateKeyboardPosition
-);
-
+visualViewport.addEventListener('resize',updateKeyboardPosition);
+visualViewport.addEventListener('scroll',updateKeyboardPosition);
 }
 
-
-$('input').addEventListener(
-'focus',
-()=>{
-
-setTimeout(updateKeyboardPosition,100);
-setTimeout(updateKeyboardPosition,300);
-
-}
-);
-
-
-$('input').addEventListener(
-'blur',
-()=>{
-
-setTimeout(
-()=>{
-
-document.documentElement.style
-.setProperty(
-'--keyboard-offset',
-'0px'
-);
-
-},
-150
-);
-
-}
-);
-
-
-window.addEventListener(
-'resize',
-updateKeyboardPosition
-);
-
+$('input').addEventListener('focus',()=>{setTimeout(updateKeyboardPosition,100);setTimeout(updateKeyboardPosition,300)});
+$('input').addEventListener('blur',()=>setTimeout(()=>document.documentElement.style.setProperty('--keyboard-offset','0px'),150));
+window.addEventListener('resize',updateKeyboardPosition);
 
 loadLocal();
 loadChatLocal();
 preview();
 updateKeyboardPosition();
-
 </script>
-
 </body>
 </html>
+```
