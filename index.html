@@ -120,8 +120,18 @@ textarea{min-height:90px;resize:vertical}.row{display:flex;gap:8px;flex-wrap:wra
 <script>
 const ids=['name','gender','age','model','personality','speech','habits','forbidden','backstory','world','worldUrl','call','userInfo','opening'];
 const models=['gemini-2.5-flash','gemini-3.1-flash-lite'];
+
 let charImage='',userImage='',history=[],busy=false,currentModel=0;
 let chatState={location:'-',time:'-',situation:'-'};
+
+/*
+  채팅 화면에 실제로 그릴 최대 메시지 수.
+  history 자체는 그대로 보존한다.
+*/
+const MAX_RENDER_MESSAGES=80;
+
+let saveChatTimer=null;
+let newChatStarted=false;
 
 const $=id=>document.getElementById(id),
 key='onechat_v3_settings',
@@ -130,17 +140,56 @@ apiKeyKey='onechat_v3_api';
 
 const text=id=>$(id).value.trim();
 
-function compress(file){return new Promise((resolve,reject)=>{let r=new FileReader();r.onload=()=>{let im=new Image();im.onload=()=>{let s=Math.min(1,420/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',.82))};im.onerror=reject;im.src=r.result};r.onerror=reject;r.readAsDataURL(file)})}
+function compress(file){
+return new Promise((resolve,reject)=>{
+let r=new FileReader();
+r.onload=()=>{
+let im=new Image();
+im.onload=()=>{
+let s=Math.min(1,420/Math.max(im.width,im.height)),
+c=document.createElement('canvas');
+c.width=im.width*s;
+c.height=im.height*s;
+c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+resolve(c.toDataURL('image/jpeg',.82))
+};
+im.onerror=reject;
+im.src=r.result
+};
+r.onerror=reject;
+r.readAsDataURL(file)
+})
+}
 
-function settings(){let o={};ids.forEach(i=>o[i]=$(i).value);o.charImage=charImage;o.userImage=userImage;return o}
-function apply(o){ids.forEach(i=>{if(o[i]!==undefined)$(i).value=o[i]});charImage=o.charImage||'';userImage=o.userImage||'';preview()}
-function preview(){$('charPrev').innerHTML=charImage?`<img src="${charImage}">`:'이미지';$('userPrev').innerHTML=userImage?`<img src="${userImage}">`:'이미지'}
+function settings(){
+let o={};
+ids.forEach(i=>o[i]=$(i).value);
+o.charImage=charImage;
+o.userImage=userImage;
+return o
+}
+
+function apply(o){
+ids.forEach(i=>{
+if(o[i]!==undefined)$(i).value=o[i]
+});
+charImage=o.charImage||'';
+userImage=o.userImage||'';
+preview()
+}
+
+function preview(){
+$('charPrev').innerHTML=charImage?`<img src="${charImage}">`:'이미지';
+$('userPrev').innerHTML=userImage?`<img src="${userImage}">`:'이미지'
+}
 
 function saveLocal(){
 try{
 localStorage.setItem(key,JSON.stringify(settings()));
 localStorage.setItem(apiKeyKey,text('apiKey'));
-}catch(e){$('status').textContent='저장 공간이 부족합니다.'}
+}catch(e){
+$('status').textContent='저장 공간이 부족합니다.'
+}
 }
 
 function loadLocal(){
@@ -148,23 +197,78 @@ try{
 let s=localStorage.getItem(key);
 if(s)apply(JSON.parse(s))
 }catch(e){}
+
 $('apiKey').value=localStorage.getItem(apiKeyKey)||''
 }
 
 ids.forEach(i=>$(i).addEventListener('input',saveLocal));
 $('apiKey').addEventListener('input',saveLocal);
 
-$('charUpload').onclick=()=>$('charImg').click();$('userUpload').onclick=()=>$('userImg').click();
-$('charImg').onchange=async e=>{if(e.target.files[0]){charImage=await compress(e.target.files[0]);preview();saveLocal()}}
-$('userImg').onchange=async e=>{if(e.target.files[0]){userImage=await compress(e.target.files[0]);preview();saveLocal()}}
-$('charRemove').onclick=()=>{charImage='';preview();saveLocal()};$('userRemove').onclick=()=>{userImage='';preview();saveLocal()};
+$('charUpload').onclick=()=>$('charImg').click();
+$('userUpload').onclick=()=>$('userImg').click();
 
-function download(data,name){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
-$('saveChar').onclick=()=>{let o=settings();delete o.apiKey;download(JSON.stringify(o,null,2),(text('name')||'character')+'-settings.json')}
+$('charImg').onchange=async e=>{
+if(e.target.files[0]){
+charImage=await compress(e.target.files[0]);
+preview();
+saveLocal()
+}
+};
+
+$('userImg').onchange=async e=>{
+if(e.target.files[0]){
+userImage=await compress(e.target.files[0]);
+preview();
+saveLocal()
+}
+};
+
+$('charRemove').onclick=()=>{
+charImage='';
+preview();
+saveLocal()
+};
+
+$('userRemove').onclick=()=>{
+userImage='';
+preview();
+saveLocal()
+};
+
+function download(data,name){
+let a=document.createElement('a');
+a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
+a.download=name;
+a.click();
+setTimeout(()=>URL.revokeObjectURL(a.href),500)
+}
+
+$('saveChar').onclick=()=>{
+let o=settings();
+
+delete o.apiKey;
+
+download(
+JSON.stringify(o,null,2),
+(text('name')||'character')+'-settings.json'
+)
+};
+
 $('loadChar').onclick=()=>$('charFile').click();
-$('charFile').onchange=async e=>{try{apply(JSON.parse(await e.target.files[0].text()));saveLocal();alert('설정을 불러왔습니다.')}catch{alert('설정 파일을 읽지 못했습니다.')}e.target.value=''};
 
-function system(){return `당신은 "${text('name')||'캐릭터'}"이다.
+$('charFile').onchange=async e=>{
+try{
+apply(JSON.parse(await e.target.files[0].text()));
+saveLocal();
+alert('설정을 불러왔습니다.')
+}catch{
+alert('설정 파일을 읽지 못했습니다.')
+}
+e.target.value=''
+};
+
+function system(){
+return `당신은 "${text('name')||'캐릭터'}"이다.
 
 성별: ${text('gender')}
 나이: ${text('age')}
@@ -226,19 +330,46 @@ ${text('opening')}
 상황: 현재 상황
 [/STATE]
 
-STATE 부분은 실제 채팅 화면에 표시하지 않는다.`}
+STATE 부분은 실제 채팅 화면에 표시하지 않는다.`
+}
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
 async function callModel(model,contents){
-let r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':text('apiKey')},body:JSON.stringify({systemInstruction:{parts:[{text:system()}]},contents,generationConfig:{temperature:1,maxOutputTokens:2500}})});
-let d={};try{d=await r.json()}catch{}return{r,d}
+let r=await fetch(
+`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+{
+method:'POST',
+headers:{
+'Content-Type':'application/json',
+'x-goog-api-key':text('apiKey')
+},
+body:JSON.stringify({
+systemInstruction:{parts:[{text:system()}]},
+contents,
+generationConfig:{
+temperature:1,
+maxOutputTokens:2500
+}
+})
+});
+
+let d={};
+try{
+d=await r.json()
+}catch{}
+
+return{r,d}
 }
 
 async function request(contents){
 if(!text('apiKey'))throw Error('API 키를 입력해주세요.');
 
-let list=text('model')==='auto'?models:[text('model')],start=text('model')==='auto'?currentModel:0;
+let list=text('model')==='auto'
+?models
+:[text('model')];
+
+let start=text('model')==='auto'?currentModel:0;
 
 for(let n=0;n<list.length;n++){
 let model=list[(start+n)%list.length];
@@ -248,19 +379,44 @@ try{
 let {r,d}=await callModel(model,contents);
 
 if(r.ok){
-let c=d?.candidates?.[0],answer=c?.content?.parts?.map(x=>x.text||'').join('');
+let c=d?.candidates?.[0],
+answer=c?.content?.parts?.map(x=>x.text||'').join('');
+
 if(answer){
 currentModel=(models.indexOf(model)+1)%models.length;
-return{text:answer,finishReason:c?.finishReason||'',model}
+return{
+text:answer,
+finishReason:c?.finishReason||'',
+model
+}
 }
 }
 
-let msg=d?.error?.message||'API 오류',quota=r.status===429||/RESOURCE_EXHAUSTED|quota|rate.?limit/i.test(msg);
-if(quota){if(text('model')==='auto')break;throw Error(msg)}
-if((r.status===500||r.status===503)&&retry===0){await sleep(1200);continue}
+let msg=d?.error?.message||'API 오류',
+quota=r.status===429||/RESOURCE_EXHAUSTED|quota|rate.?limit/i.test(msg);
+
+if(quota){
+if(text('model')==='auto')break;
 throw Error(msg)
+}
+
+if((r.status===500||r.status===503)&&retry===0){
+await sleep(1200);
+continue
+}
+
+throw Error(msg)
+
 }catch(e){
-if(retry===0&&/fetch|network|Failed to fetch/i.test(e.message)){await sleep(1200);continue}
+
+if(
+retry===0&&
+/fetch|network|Failed to fetch/i.test(e.message)
+){
+await sleep(1200);
+continue
+}
+
 throw e
 }
 }
@@ -277,9 +433,14 @@ $('chatSituation').textContent='상황: '+chatState.situation
 
 function extractState(answer){
 let m=answer.match(/\[STATE\]([\s\S]*?)\[\/STATE\]/i);
+
 if(!m)return answer;
 
-let s=m[1],a=s.match(/위치\s*:\s*(.+)/i),b=s.match(/시간\s*:\s*(.+)/i),c=s.match(/상황\s*:\s*(.+)/i);
+let s=m[1],
+a=s.match(/위치\s*:\s*(.+)/i),
+b=s.match(/시간\s*:\s*(.+)/i),
+c=s.match(/상황\s*:\s*(.+)/i);
+
 if(a)chatState.location=a[1].trim();
 if(b)chatState.time=b[1].trim();
 if(c)chatState.situation=c[1].trim();
@@ -291,10 +452,13 @@ return answer.replace(/\[STATE\][\s\S]*?\[\/STATE\]/i,'').trim()
 }
 
 async function generateReply(){
-let work=[...history.slice(-50)],out='',n=0;
+let work=[...history.slice(-50)],
+out='',
+n=0;
 
 while(n<3){
 let r=await request(work);
+
 out+=r.text;
 
 if(r.finishReason!=='MAX_TOKENS')break;
@@ -311,57 +475,144 @@ n++
 return extractState(out)
 }
 
-function saveChat(){try{localStorage.setItem(chatKey,JSON.stringify({history,chatState}))}catch(e){}}
+/*
+  localStorage 저장을 약간 묶어서 처리한다.
+  메시지를 추가할 때마다 즉시 JSON 전체를 저장하지 않고,
+  짧은 시간 동안 변경 사항을 모아서 한 번 저장한다.
+*/
+function saveChat(){
+if(saveChatTimer)clearTimeout(saveChatTimer);
+
+saveChatTimer=setTimeout(()=>{
+saveChatNow()
+},300)
+}
+
+function saveChatNow(){
+if(saveChatTimer){
+clearTimeout(saveChatTimer);
+saveChatTimer=null
+}
+
+try{
+localStorage.setItem(
+chatKey,
+JSON.stringify({
+history,
+chatState
+})
+)
+}catch(e){
+/*
+  저장 공간이 부족해도 채팅 자체가 멈추지 않도록 한다.
+*/
+}
+}
 
 function loadChatLocal(){
+if(newChatStarted)return false;
+
 try{
 let d=JSON.parse(localStorage.getItem(chatKey)||'null');
-if(d?.history){
+
+if(d?.history&&Array.isArray(d.history)){
 history=d.history;
+
 if(d.chatState)chatState=d.chatState;
+
 updateChatState();
 render();
+
 return true
 }
+
 }catch(e){}
+
 return false
 }
 
+/*
+  긴 대화 전체를 DOM에 한꺼번에 넣지 않는다.
+  history 자체는 삭제하지 않고 그대로 유지한다.
+*/
 function render(){
-$('messages').innerHTML='';
-history.forEach(x=>addVisual(x.role==='user'?'user':'ai',x.parts?.[0]?.text||''));
-$('turn').textContent=`${Math.floor(history.length/2)}턴 · 자동 저장됨`
+let box=$('messages');
+
+box.innerHTML='';
+
+let start=Math.max(0,history.length-MAX_RENDER_MESSAGES);
+let visible=history.slice(start);
+
+visible.forEach(x=>{
+addVisual(
+x.role==='user'?'user':'ai',
+x.parts?.[0]?.text||''
+)
+});
+
+$('turn').textContent=`${Math.floor(history.length/2)}턴 · 자동 저장됨`;
+
+window.scrollTo(0,document.body.scrollHeight)
 }
 
 function addVisual(role,t){
 let row=document.createElement('div');
+
 row.className='msg '+role;
+
 let b=document.createElement('div');
+
 b.className='bubble';
 b.textContent=t;
+
 row.appendChild(b);
-$('messages').appendChild(row);
-window.scrollTo(0,document.body.scrollHeight)
+$('messages').appendChild(row)
 }
 
 function add(role,t){
-history.push({role,parts:[{text:t}]});
-addVisual(role==='user'?'user':'ai',t);
-saveChat()
+history.push({
+role,
+parts:[{text:t}]
+});
+
+addVisual(
+role==='user'?'user':'ai',
+t
+);
+
+saveChat();
+
+$('turn').textContent=`${Math.floor(history.length/2)}턴 · 자동 저장됨`;
+
+window.scrollTo(0,document.body.scrollHeight)
 }
 
 function addError(msg,retry){
 let row=document.createElement('div');
 row.className='msg ai';
+
 let b=document.createElement('div');
 b.className='bubble';
+
 b.textContent=msg;
+
 let x=document.createElement('button');
+
 x.className='retryBtn';
 x.textContent='재시도';
-x.onclick=async()=>{x.disabled=true;try{row.remove();await retry()}catch{}};
+
+x.onclick=async()=>{
+x.disabled=true;
+
+try{
+row.remove();
+await retry()
+}catch{}
+};
+
 b.appendChild(x);
 row.appendChild(b);
+
 $('messages').appendChild(row)
 }
 
@@ -370,50 +621,89 @@ if(busy||!t.trim())return;
 
 busy=true;
 $('send').disabled=true;
+
 add('user',t);
 
 let w=document.createElement('div');
+
 w.className='msg ai';
 w.innerHTML='<div class="bubble">생각 중…</div>';
+
 $('messages').appendChild(w);
 
 try{
 let r=await generateReply();
+
 w.remove();
+
 add('model',r)
+
 }catch(e){
+
 w.remove();
+
 addError(e.message,sendRetry)
+
 }finally{
+
 busy=false;
 $('send').disabled=false
+
 }
 }
 
 async function sendRetry(){
 if(busy)return;
+
 busy=true;
 
 let w=document.createElement('div');
+
 w.className='msg ai';
 w.innerHTML='<div class="bubble">다시 생각 중…</div>';
+
 $('messages').appendChild(w);
 
 try{
+
 let r=await generateReply();
+
 w.remove();
+
 add('model',r)
+
 }catch(e){
+
 w.remove();
+
 addError(e.message,sendRetry)
-}finally{busy=false}
+
+}finally{
+
+busy=false
+}
 }
 
 async function begin(){
-if(!text('name'))return alert('캐릭터 이름을 입력해주세요.');
-if(!text('apiKey'))return alert('Gemini API 키를 입력해주세요.');
+if(!text('name'))
+return alert('캐릭터 이름을 입력해주세요.');
+
+if(!text('apiKey'))
+return alert('Gemini API 키를 입력해주세요.');
 
 saveLocal();
+
+/*
+  새 대화 상태가 아니므로 기존 저장 대화를 다시 불러올 수 있다.
+*/
+newChatStarted=false;
+
+/*
+  대화 화면을 열기 전에 이전 DOM을 확실하게 비운다.
+  history 자체는 loadChatLocal()에서 필요하면 다시 불러온다.
+*/
+$('messages').innerHTML='';
+$('input').value='';
 
 $('setup').style.display='none';
 $('chat').classList.add('active');
@@ -421,155 +711,308 @@ $('chatTitle').textContent=text('name');
 
 if(loadChatLocal())return;
 
+/*
+  저장된 대화가 없을 때만 시작 상황을 생성한다.
+*/
 if(text('opening')){
-history=[{role:'user',parts:[{text:`[시작 상황]
+
+history=[
+{
+role:'user',
+parts:[
+{
+text:`[시작 상황]
 ${text('opening')}
 
-이 장면을 바탕으로 현재 위치, 시간, 상황을 판단하고 캐릭터로 먼저 말을 걸어줘.`}]}];
+이 장면을 바탕으로 현재 위치, 시간, 상황을 판단하고 캐릭터로 먼저 말을 걸어줘.`
+}
+]
+}
+];
 
-saveChat();
+saveChatNow();
 
 let w=document.createElement('div');
+
 w.className='msg ai';
 w.innerHTML='<div class="bubble">생각 중…</div>';
+
 $('messages').appendChild(w);
 
 try{
+
 let r=await generateReply();
+
 w.remove();
+
 add('model',r)
+
 }catch(e){
+
 w.remove();
+
 addError(e.message,beginRetry)
+
 }
 }
 }
 
 async function beginRetry(){
-try{add('model',await generateReply())}
-catch(e){addError(e.message,beginRetry)}
+try{
+add('model',await generateReply())
+}catch(e){
+addError(e.message,beginRetry)
+}
 }
 
 $('test').onclick=async()=>{
 let s=$('status');
+
 s.textContent='연결 테스트 중…';
 
 try{
-await request([{role:'user',parts:[{text:'짧게 자기소개를 해줘.'}]}]);
+
+await request([
+{
+role:'user',
+parts:[
+{
+text:'짧게 자기소개를 해줘.'
+}
+]
+}
+]);
+
 s.textContent='연결 성공!'
-}catch(e){s.textContent=e.message}
+
+}catch(e){
+
+s.textContent=e.message
+
+}
 };
 
 $('start').onclick=begin;
 
+/*
+  설정으로 돌아갈 때:
+  1. 대화는 저장
+  2. 채팅 DOM을 완전히 비움
+  3. 채팅 화면을 닫음
+  4. history는 유지해서 다시 시작하면 이어갈 수 있음
+*/
 $('back').onclick=()=>{
+
+saveLocal();
+saveChatNow();
+
+/*
+  Safari 메모리 부담을 줄이기 위해
+  채팅 메시지 DOM을 모두 제거한다.
+*/
+$('messages').innerHTML='';
+$('input').value='';
+
 $('chat').classList.remove('active');
 $('setup').style.display='block';
-saveLocal();
-saveChat()
+
 };
 
 $('send').onclick=()=>{
 let t=text('input');
+
 $('input').value='';
+
 sendMessage(t)
 };
 
 $('input').addEventListener('keydown',e=>{
 if(e.key==='Enter'&&!e.shiftKey){
+
 e.preventDefault();
+
 $('send').click()
+
 }
 });
 
-$('new').onclick=()=>$('modal').classList.add('show');
-$('cancel').onclick=()=>$('modal').classList.remove('show');
+$('new').onclick=()=>{
+$('modal').classList.add('show')
+};
+
+$('cancel').onclick=()=>{
+$('modal').classList.remove('show')
+};
 
 $('yes').onclick=()=>{
+
 $('modal').classList.remove('show');
+
+/*
+  새 대화를 시작했다는 표시.
+  이후 begin()에서 기존 localStorage 대화를
+  다시 불러오지 않도록 한다.
+*/
+newChatStarted=true;
+
 history=[];
-chatState={location:'-',time:'-',situation:'-'};
+
+chatState={
+location:'-',
+time:'-',
+situation:'-'
+};
+
 localStorage.removeItem(chatKey);
+
+if(saveChatTimer){
+clearTimeout(saveChatTimer);
+saveChatTimer=null
+}
+
 $('input').value='';
 $('messages').innerHTML='';
+
 $('turn').textContent='0턴 · 자동 저장됨';
+
 updateChatState();
-window.scrollTo(0,0)
+
+window.scrollTo(0,0);
+
 };
 
 $('saveChat').onclick=()=>{
+
 download(
-JSON.stringify({
+JSON.stringify(
+{
 version:5,
 savedAt:new Date().toISOString(),
 character:text('name'),
 chatState,
 history
-},null,2),
+},
+null,
+2
+),
 (text('name')||'chat')+'-conversation.json'
 )
+
 };
 
 $('loadChat').onclick=()=>$('chatFile').click();
 
 $('chatFile').onchange=async e=>{
+
 try{
+
 let d=JSON.parse(await e.target.files[0].text());
+
 history=d.history||[];
+
 if(d.chatState)chatState=d.chatState;
-saveChat();
+
+newChatStarted=false;
+
+saveChatNow();
 updateChatState();
 render();
+
 alert('대화를 복구했습니다.')
+
 }catch{
+
 alert('대화 파일을 읽지 못했습니다.')
+
 }
+
 e.target.value=''
 };
 
 $('readWorld').onclick=async()=>{
+
 let url=text('worldUrl');
-if(!url)return $('worldStatus').textContent='링크를 입력해주세요.';
+
+if(!url)
+return $('worldStatus').textContent='링크를 입력해주세요.';
 
 $('worldStatus').textContent='자료 읽는 중…';
 
 try{
+
 let r=await fetch(url);
+
 if(!r.ok)throw Error();
 
-let doc=new DOMParser().parseFromString(await r.text(),'text/html');
-doc.querySelectorAll('script,style,noscript,svg').forEach(x=>x.remove());
+let doc=new DOMParser().parseFromString(
+await r.text(),
+'text/html'
+);
 
-let content=(doc.body?.innerText||'').replace(/\s+/g,' ').trim();
+doc.querySelectorAll(
+'script,style,noscript,svg'
+).forEach(x=>x.remove());
+
+let content=(doc.body?.innerText||'')
+.replace(/\s+/g,' ')
+.trim();
+
 if(!content)throw Error();
-if(content.length>12000)content=content.slice(0,12000);
+
+if(content.length>12000)
+content=content.slice(0,12000);
 
 $('world').value=
 text('world')+
 (text('world')?'\n\n':'')+
-'[외부 세계관 자료]\n'+content;
+'[외부 세계관 자료]\n'+
+content;
 
 saveLocal();
+
 $('worldStatus').textContent='세계관 자료를 추가했습니다.'
+
 }catch(e){
-$('worldStatus').textContent='읽지 못했습니다. 해당 사이트가 외부 접근을 막고 있을 수 있습니다.'
+
+$('worldStatus').textContent=
+'읽지 못했습니다. 해당 사이트가 외부 접근을 막고 있을 수 있습니다.'
+
 }
 };
 
+/*
+  페이지가 실제로 종료될 때는 예약된 저장을 취소하고
+  즉시 마지막 상태를 저장한다.
+*/
 window.addEventListener('beforeunload',()=>{
+
 saveLocal();
-saveChat()
+saveChatNow();
+
 });
 
+/*
+  Safari에서 다른 앱으로 이동하거나 탭이 백그라운드로 갈 때
+  현재 상태를 즉시 저장한다.
+*/
 document.addEventListener('visibilitychange',()=>{
+
 if(document.hidden){
+
 saveLocal();
-saveChat()
+saveChatNow();
+
 }
+
 });
 
 loadLocal();
+
+/*
+  처음 사이트를 열었을 때는 저장된 대화를 불러온다.
+*/
 loadChatLocal();
+
 preview();
 updateChatState();
 </script>
