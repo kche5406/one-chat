@@ -23,7 +23,6 @@ textarea{min-height:90px;resize:vertical}.row{display:flex;gap:8px;flex-wrap:wra
 .avatar{width:88px;height:88px;border-radius:23px;background:#eefaff;border:1px dashed #c5e5f1;display:flex;align-items:center;justify-content:center;overflow:hidden;margin:9px 0}
 .avatar img{width:100%;height:100%;object-fit:cover}.hidden{display:none!important}
 .start{width:100%;border:0;padding:15px;border-radius:17px;font-weight:900;font-size:16px;margin-top:9px}
-
 #chat{display:none;min-height:100vh}#chat.active{display:flex;flex-direction:column}
 .chatHeader{position:sticky;top:0;z-index:3;background:rgba(245,251,255,.94);backdrop-filter:blur(10px)}
 .chatTop{display:flex;gap:9px;align-items:center;padding:8px 0 6px}
@@ -41,41 +40,33 @@ textarea{min-height:90px;resize:vertical}.row{display:flex;gap:8px;flex-wrap:wra
 @media(max-width:560px){.grid{grid-template-columns:1fr}.app{padding-left:12px;padding-right:12px}.card{padding:15px}}
 </style>
 </head>
-
 <body>
 <div class="app">
-
 <section id="setup">
 <div class="header"><div class="logo">ONE CHAT</div><div class="sub">개인용 · 설정과 대화를 자동 저장합니다</div></div>
-
 <div class="row" style="justify-content:center;margin-bottom:10px">
 <button class="btn" id="loadChar">설정 불러오기</button><button class="btn" id="saveChar">설정 백업</button>
 <button class="btn" id="loadChat">대화 복구</button><button class="btn" id="saveChat">대화 백업</button>
 <input id="charFile" type="file" accept=".json" class="hidden"><input id="chatFile" type="file" accept=".json" class="hidden">
 </div>
-
 <div class="card">
 <h2>캐릭터 설정</h2><div class="hint">입력할 때마다 자동 저장됩니다.</div>
 <div class="avatar" id="charPrev">이미지</div>
 <div class="row"><button class="btn" id="charUpload">이미지 업로드</button><button class="btn danger" id="charRemove">삭제</button><input id="charImg" type="file" accept="image/*" class="hidden"></div>
-
 <div class="grid">
 <div class="field"><label>이름 *</label><input id="name" placeholder="예: 유진"></div>
 <div class="field"><label>성별</label><input id="gender"></div>
 <div class="field"><label>나이</label><input id="age"></div>
-<div class="field"><label>모델</label><select id="model"><option value="auto">자동 관리</option><option value="gemini-2.5-flash">Gemini 2.5 Flash</option><option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option></select></div>
+<div class="field"><label>모델</label><select id="model"><option value="auto">자동 관리</option><option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option><option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option><option value="gemini-3.6-flash">Gemini 3.6 Flash</option><option value="gemini-3.8-flash">Gemini 3.8 Flash</option><option value="gemini-2.5-flash">Gemini 2.5 Flash (기존 프로젝트용)</option></select></div>
 </div>
-
 <div class="field"><label>성격</label><textarea id="personality"></textarea></div>
 <div class="field"><label>말투 / 어미</label><textarea id="speech"></textarea></div>
 <div class="field"><label>말버릇 / 즐겨 쓰는 표현</label><textarea id="habits"></textarea></div>
 <div class="field"><label>절대 쓰지 않는 표현</label><textarea id="forbidden"></textarea></div>
 <div class="field"><label>캐릭터 서사 / 배경</label><textarea id="backstory"></textarea></div>
 <div class="field"><label>세계관 / 무대</label><textarea id="world"></textarea></div>
-
 <div class="field"><label>세계관 자료 링크</label><input id="worldUrl" placeholder="세계관 문서 링크"><button class="btn" id="readWorld" style="margin-top:7px">자료 읽기</button><div id="worldStatus" class="notice" style="margin-top:6px"></div></div>
 </div>
-
 <div class="card">
 <h2>유저 설정</h2>
 <div class="avatar" id="userPrev">이미지</div>
@@ -83,18 +74,14 @@ textarea{min-height:90px;resize:vertical}.row{display:flex;gap:8px;flex-wrap:wra
 <div class="field"><label>유저 호칭</label><input id="call"></div>
 <div class="field"><label>유저 정보 / 관계</label><textarea id="userInfo"></textarea></div>
 </div>
-
 <div class="card"><h2>시작 상황</h2><textarea id="opening" placeholder="첫 장면을 적어주세요."></textarea></div>
-
 <div class="card">
 <h2>Gemini API</h2><input id="apiKey" type="password" placeholder="API 키를 입력하세요">
 <div class="notice">API 키는 설정 백업에 포함하지 않습니다.</div>
 <button class="btn" id="test" style="margin-top:10px">연결 테스트</button><div id="status" class="notice" style="margin-top:8px"></div>
 </div>
-
 <button class="start" id="start">대화 시작</button>
 </section>
-
 <section id="chat">
 <div class="chatHeader">
 <div class="chatTop">
@@ -106,40 +93,31 @@ textarea{min-height:90px;resize:vertical}.row{display:flex;gap:8px;flex-wrap:wra
 <span id="chatLocation">위치: -</span><span id="chatTime">시간: -</span><span id="chatSituation">상황: -</span>
 </div>
 </div>
-
 <div class="messages" id="messages"></div>
 <div class="composer"><textarea id="input" placeholder="메시지를 입력하세요..." rows="1"></textarea><button class="send" id="send">전송</button></div>
 </section>
 </div>
-
 <div class="modal" id="modal"><div class="modalBox">
 <h3>새 대화를 시작할까요?</h3><p class="hint">현재 대화만 삭제합니다. 캐릭터 설정은 남습니다.</p>
 <div class="row" style="justify-content:flex-end"><button class="btn" id="cancel">취소</button><button class="btn primary" id="yes">삭제하고 시작</button></div>
 </div></div>
-
 <script>
 const ids=['name','gender','age','model','personality','speech','habits','forbidden','backstory','world','worldUrl','call','userInfo','opening'];
-const models=['gemini-2.5-flash','gemini-3.1-flash-lite'];
-
+const models=['gemini-3.5-flash-lite','gemini-3.1-flash-lite','gemini-3.6-flash','gemini-3.8-flash','gemini-2.5-flash'];
 let charImage='',userImage='',history=[],busy=false,currentModel=0;
 let chatState={location:'-',time:'-',situation:'-'};
-
 /*
   채팅 화면에 실제로 그릴 최대 메시지 수.
   history 자체는 그대로 보존한다.
 */
 const MAX_RENDER_MESSAGES=80;
-
 let saveChatTimer=null;
 let newChatStarted=false;
-
 const $=id=>document.getElementById(id),
 key='onechat_v3_settings',
 chatKey='onechat_v3_chat',
 apiKeyKey='onechat_v3_api';
-
 const text=id=>$(id).value.trim();
-
 function compress(file){
 return new Promise((resolve,reject)=>{
 let r=new FileReader();
@@ -160,7 +138,6 @@ r.onerror=reject;
 r.readAsDataURL(file)
 })
 }
-
 function settings(){
 let o={};
 ids.forEach(i=>o[i]=$(i).value);
@@ -168,7 +145,6 @@ o.charImage=charImage;
 o.userImage=userImage;
 return o
 }
-
 function apply(o){
 ids.forEach(i=>{
 if(o[i]!==undefined)$(i).value=o[i]
@@ -177,12 +153,10 @@ charImage=o.charImage||'';
 userImage=o.userImage||'';
 preview()
 }
-
 function preview(){
 $('charPrev').innerHTML=charImage?`<img src="${charImage}">`:'이미지';
 $('userPrev').innerHTML=userImage?`<img src="${userImage}">`:'이미지'
 }
-
 function saveLocal(){
 try{
 localStorage.setItem(key,JSON.stringify(settings()));
@@ -191,22 +165,17 @@ localStorage.setItem(apiKeyKey,text('apiKey'));
 $('status').textContent='저장 공간이 부족합니다.'
 }
 }
-
 function loadLocal(){
 try{
 let s=localStorage.getItem(key);
 if(s)apply(JSON.parse(s))
 }catch(e){}
-
 $('apiKey').value=localStorage.getItem(apiKeyKey)||''
 }
-
 ids.forEach(i=>$(i).addEventListener('input',saveLocal));
 $('apiKey').addEventListener('input',saveLocal);
-
 $('charUpload').onclick=()=>$('charImg').click();
 $('userUpload').onclick=()=>$('userImg').click();
-
 $('charImg').onchange=async e=>{
 if(e.target.files[0]){
 charImage=await compress(e.target.files[0]);
@@ -214,7 +183,6 @@ preview();
 saveLocal()
 }
 };
-
 $('userImg').onchange=async e=>{
 if(e.target.files[0]){
 userImage=await compress(e.target.files[0]);
@@ -222,19 +190,16 @@ preview();
 saveLocal()
 }
 };
-
 $('charRemove').onclick=()=>{
 charImage='';
 preview();
 saveLocal()
 };
-
 $('userRemove').onclick=()=>{
 userImage='';
 preview();
 saveLocal()
 };
-
 function download(data,name){
 let a=document.createElement('a');
 a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
@@ -242,20 +207,15 @@ a.download=name;
 a.click();
 setTimeout(()=>URL.revokeObjectURL(a.href),500)
 }
-
 $('saveChar').onclick=()=>{
 let o=settings();
-
 delete o.apiKey;
-
 download(
 JSON.stringify(o,null,2),
 (text('name')||'character')+'-settings.json'
 )
 };
-
 $('loadChar').onclick=()=>$('charFile').click();
-
 $('charFile').onchange=async e=>{
 try{
 apply(JSON.parse(await e.target.files[0].text()));
@@ -266,59 +226,44 @@ alert('설정 파일을 읽지 못했습니다.')
 }
 e.target.value=''
 };
-
 function system(){
 return `당신은 "${text('name')||'캐릭터'}"이다.
-
 성별: ${text('gender')}
 나이: ${text('age')}
-
 성격:
 ${text('personality')}
-
 말투/어미:
 ${text('speech')}
-
 말버릇:
 ${text('habits')}
-
 절대 사용하지 않는 표현:
 ${text('forbidden')}
-
 캐릭터 서사:
 ${text('backstory')}
-
 세계관:
 ${text('world')}
-
 유저 호칭:
 ${text('call')}
-
 유저 정보/관계:
 ${text('userInfo')}
-
 현재 대화 상태:
 위치: ${chatState.location}
 시간: ${chatState.time}
 상황: ${chatState.situation}
-
 시작 상황:
 ${text('opening')}
-
 설정을 최우선으로 유지한다.
 실제 대화처럼 자연스럽게 답한다.
 캐릭터의 말투와 성격을 일관되게 유지한다.
 대사와 지문을 자연스럽게 섞는다.
 표정, 시선, 몸짓, 자세, 감정과 주변 상황을 적절히 묘사한다.
 이전 대화의 맥락과 관계를 자연스럽게 이어간다.
-
 확인형 표현을 습관적으로 반복하지 않는다.
 '응?', '그렇지?', '맞지?'처럼 상대의 반응을 확인하는 표현을 대사의 끝에 습관적으로 붙이지 않는다.
 이러한 표현은 실제로 상대에게 확인하거나 되물을 필요가 있는 경우에만 사용한다.
 대부분의 대사는 확인형 표현 없이 자연스럽게 끝낸다.
 같은 확인형 표현을 여러 대사에서 반복하지 않는다.
 '알겠어?', '알겠나?' 의 경우 대사에 넣지 않는다. 사용하지 않는다.
-
 현재 상태는 대화 내용을 보고 자동으로 관리한다.
 위치는 반드시 "큰 장소 - 세부 장소" 형식으로 기록한다.
 예: 집 - 부엌 / 집 - 안방 / 집 - 거실 / 회사 - 사무실 / 거리 - 카페 / 거리 - 공원
@@ -328,20 +273,15 @@ ${text('opening')}
 시간은 반드시 오전 또는 오후로 표시한다.
 상황은 현재 두 사람의 행동이나 분위기를 짧게 표시한다.
 대화에서 실제 변화가 발생한 경우에만 상태를 변경하고, 변화가 없으면 기존 상태를 유지한다.
-
 답변 마지막에 반드시 다음 형식으로 상태를 표시한다.
-
 [STATE]
 위치: 현재 위치
 시간: 오전 또는 오후
 상황: 현재 상황
 [/STATE]
-
 STATE 부분은 실제 채팅 화면에 표시하지 않는다.`
 }
-
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-
 async function callModel(model,contents){
 let r=await fetch(
 `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
@@ -360,37 +300,28 @@ maxOutputTokens:2500
 }
 })
 });
-
 let d={};
 try{
 d=await r.json()
 }catch{}
-
 return{r,d}
 }
-
 async function request(contents){
 if(!text('apiKey'))throw Error('API 키를 입력해주세요.');
-
-let list=text('model')==='auto'
-?models
-:[text('model')];
-
-let start=text('model')==='auto'?currentModel:0;
-
+let auto=text('model')==='auto';
+let list=auto?models:[text('model')];
+let start=auto?currentModel:0;
+let failures=[];
 for(let n=0;n<list.length;n++){
 let model=list[(start+n)%list.length];
-
 for(let retry=0;retry<2;retry++){
 try{
 let {r,d}=await callModel(model,contents);
-
 if(r.ok){
 let c=d?.candidates?.[0],
 answer=c?.content?.parts?.map(x=>x.text||'').join('');
-
 if(answer){
-currentModel=(models.indexOf(model)+1)%models.length;
+if(auto)currentModel=Math.max(0,models.indexOf(model));
 return{
 text:answer,
 finishReason:c?.finishReason||'',
@@ -398,24 +329,24 @@ model
 }
 }
 }
-
-let msg=d?.error?.message||'API 오류',
-quota=r.status===429||/RESOURCE_EXHAUSTED|quota|rate.?limit/i.test(msg);
-
-if(quota){
-if(text('model')==='auto')break;
-throw Error(msg)
-}
-
-if((r.status===500||r.status===503)&&retry===0){
-await sleep(1200);
+let msg=d?.error?.message||'API 오류';
+let quota=r.status===429||/RESOURCE_EXHAUSTED|quota|rate.?limit/i.test(msg);
+let unavailable=r.status===500||r.status===503;
+if(auto){
+if(unavailable&&retry===0){
+await sleep(1500);
 continue
 }
-
+failures.push(model+': '+msg);
+break
+}
+if(quota)throw Error(msg);
+if(unavailable&&retry===0){
+await sleep(1500);
+continue
+}
 throw Error(msg)
-
 }catch(e){
-
 if(
 retry===0&&
 /fetch|network|Failed to fetch/i.test(e.message)
@@ -423,65 +354,55 @@ retry===0&&
 await sleep(1200);
 continue
 }
-
+if(auto){
+failures.push(model+': '+(e.message||'요청 실패'));
+break
+}
 throw e
 }
 }
 }
-
+if(failures.length){
+throw Error('자동 관리에서 사용 가능한 모델을 찾지 못했습니다. 잠시 후 다시 시도하거나 모델을 직접 선택해 주세요.\n\n'+failures.join('\n'))
+}
 throw Error('사용 가능한 모델의 사용량이 모두 부족합니다.')
 }
-
 function updateChatState(){
 $('chatLocation').textContent='위치: '+chatState.location;
 $('chatTime').textContent='시간: '+chatState.time;
 $('chatSituation').textContent='상황: '+chatState.situation
 }
-
 function extractState(answer){
 let m=answer.match(/\[STATE\]([\s\S]*?)\[\/STATE\]/i);
-
 if(!m)return answer;
-
 let s=m[1],
 a=s.match(/위치\s*:\s*(.+)/i),
 b=s.match(/시간\s*:\s*(.+)/i),
 c=s.match(/상황\s*:\s*(.+)/i);
-
 if(a)chatState.location=a[1].trim();
 if(b)chatState.time=b[1].trim();
 if(c)chatState.situation=c[1].trim();
-
 updateChatState();
 saveChat();
-
 return answer.replace(/\[STATE\][\s\S]*?\[\/STATE\]/i,'').trim()
 }
-
 async function generateReply(){
 let work=[...history.slice(-50)],
 out='',
 n=0;
-
 while(n<3){
 let r=await request(work);
-
 out+=r.text;
-
 if(r.finishReason!=='MAX_TOKENS')break;
-
 work=[
 ...work.slice(-48),
 {role:'model',parts:[{text:r.text}]},
 {role:'user',parts:[{text:'앞의 내용을 반복하지 말고 자연스럽게 이어서 완성해주세요.'}]}
 ];
-
 n++
 }
-
 return extractState(out)
 }
-
 /*
   localStorage 저장을 약간 묶어서 처리한다.
   메시지를 추가할 때마다 즉시 JSON 전체를 저장하지 않고,
@@ -489,18 +410,15 @@ return extractState(out)
 */
 function saveChat(){
 if(saveChatTimer)clearTimeout(saveChatTimer);
-
 saveChatTimer=setTimeout(()=>{
 saveChatNow()
 },300)
 }
-
 function saveChatNow(){
 if(saveChatTimer){
 clearTimeout(saveChatTimer);
 saveChatTimer=null
 }
-
 try{
 localStorage.setItem(
 chatKey,
@@ -515,214 +433,143 @@ chatState
 */
 }
 }
-
 function loadChatLocal(){
 if(newChatStarted)return false;
-
 try{
 let d=JSON.parse(localStorage.getItem(chatKey)||'null');
-
 if(d?.history&&Array.isArray(d.history)){
 history=d.history;
-
 if(d.chatState)chatState=d.chatState;
-
 updateChatState();
 render();
-
 return true
 }
-
 }catch(e){}
-
 return false
 }
-
 /*
   긴 대화 전체를 DOM에 한꺼번에 넣지 않는다.
   history 자체는 삭제하지 않고 그대로 유지한다.
 */
 function render(){
 let box=$('messages');
-
 box.innerHTML='';
-
 let start=Math.max(0,history.length-MAX_RENDER_MESSAGES);
 let visible=history.slice(start);
-
 visible.forEach(x=>{
 addVisual(
 x.role==='user'?'user':'ai',
 x.parts?.[0]?.text||''
 )
 });
-
 $('turn').textContent=`${Math.floor(history.length/2)}턴 · 자동 저장됨`;
-
 window.scrollTo(0,document.body.scrollHeight)
 }
-
 function addVisual(role,t){
 let row=document.createElement('div');
-
 row.className='msg '+role;
-
 let b=document.createElement('div');
-
 b.className='bubble';
 b.textContent=t;
-
 row.appendChild(b);
 $('messages').appendChild(row)
 }
-
 function add(role,t){
 history.push({
 role,
 parts:[{text:t}]
 });
-
 addVisual(
 role==='user'?'user':'ai',
 t
 );
-
 saveChat();
-
 $('turn').textContent=`${Math.floor(history.length/2)}턴 · 자동 저장됨`;
-
 window.scrollTo(0,document.body.scrollHeight)
 }
-
 function addError(msg,retry){
 let row=document.createElement('div');
 row.className='msg ai';
-
 let b=document.createElement('div');
 b.className='bubble';
-
 b.textContent=msg;
-
 let x=document.createElement('button');
-
 x.className='retryBtn';
 x.textContent='재시도';
-
 x.onclick=async()=>{
 x.disabled=true;
-
 try{
 row.remove();
 await retry()
 }catch{}
 };
-
 b.appendChild(x);
 row.appendChild(b);
-
 $('messages').appendChild(row)
 }
-
 async function sendMessage(t){
 if(busy||!t.trim())return;
-
 busy=true;
 $('send').disabled=true;
-
 add('user',t);
-
 let w=document.createElement('div');
-
 w.className='msg ai';
 w.innerHTML='<div class="bubble">생각 중…</div>';
-
 $('messages').appendChild(w);
-
 try{
 let r=await generateReply();
-
 w.remove();
-
 add('model',r)
-
 }catch(e){
-
 w.remove();
-
 addError(e.message,sendRetry)
-
 }finally{
-
 busy=false;
 $('send').disabled=false
-
 }
 }
-
 async function sendRetry(){
 if(busy)return;
-
 busy=true;
-
 let w=document.createElement('div');
-
 w.className='msg ai';
 w.innerHTML='<div class="bubble">다시 생각 중…</div>';
-
 $('messages').appendChild(w);
-
 try{
-
 let r=await generateReply();
-
 w.remove();
-
 add('model',r)
-
 }catch(e){
-
 w.remove();
-
 addError(e.message,sendRetry)
-
 }finally{
-
 busy=false
 }
 }
-
 async function begin(){
 if(!text('name'))
 return alert('캐릭터 이름을 입력해주세요.');
-
 if(!text('apiKey'))
 return alert('Gemini API 키를 입력해주세요.');
-
 saveLocal();
-
 /*
   새 대화 상태가 아니므로 기존 저장 대화를 다시 불러올 수 있다.
 */
 newChatStarted=false;
-
 /*
   대화 화면을 열기 전에 이전 DOM을 확실하게 비운다.
   history 자체는 loadChatLocal()에서 필요하면 다시 불러온다.
 */
 $('messages').innerHTML='';
 $('input').value='';
-
 $('setup').style.display='none';
 $('chat').classList.add('active');
 $('chatTitle').textContent=text('name');
-
 if(loadChatLocal())return;
-
 /*
   저장된 대화가 없을 때만 시작 상황을 생성한다.
 */
 if(text('opening')){
-
 history=[
 {
 role:'user',
@@ -730,40 +577,26 @@ parts:[
 {
 text:`[시작 상황]
 ${text('opening')}
-
 이 장면을 바탕으로 현재 위치, 시간, 상황을 판단하고 캐릭터로 먼저 말을 걸어줘.`
 }
 ]
 }
 ];
-
 saveChatNow();
-
 let w=document.createElement('div');
-
 w.className='msg ai';
 w.innerHTML='<div class="bubble">생각 중…</div>';
-
 $('messages').appendChild(w);
-
 try{
-
 let r=await generateReply();
-
 w.remove();
-
 add('model',r)
-
 }catch(e){
-
 w.remove();
-
 addError(e.message,beginRetry)
-
 }
 }
 }
-
 async function beginRetry(){
 try{
 add('model',await generateReply())
@@ -771,14 +604,10 @@ add('model',await generateReply())
 addError(e.message,beginRetry)
 }
 }
-
 $('test').onclick=async()=>{
 let s=$('status');
-
 s.textContent='연결 테스트 중…';
-
 try{
-
 await request([
 {
 role:'user',
@@ -789,18 +618,12 @@ text:'짧게 자기소개를 해줘.'
 ]
 }
 ]);
-
 s.textContent='연결 성공!'
-
 }catch(e){
-
 s.textContent=e.message
-
 }
 };
-
 $('start').onclick=begin;
-
 /*
   설정으로 돌아갈 때:
   1. 대화는 저장
@@ -809,87 +632,60 @@ $('start').onclick=begin;
   4. history는 유지해서 다시 시작하면 이어갈 수 있음
 */
 $('back').onclick=()=>{
-
 saveLocal();
 saveChatNow();
-
 /*
   Safari 메모리 부담을 줄이기 위해
   채팅 메시지 DOM을 모두 제거한다.
 */
 $('messages').innerHTML='';
 $('input').value='';
-
 $('chat').classList.remove('active');
 $('setup').style.display='block';
-
 };
-
 $('send').onclick=()=>{
 let t=text('input');
-
 $('input').value='';
-
 sendMessage(t)
 };
-
 $('input').addEventListener('keydown',e=>{
 if(e.key==='Enter'&&!e.shiftKey){
-
 e.preventDefault();
-
 $('send').click()
-
 }
 });
-
 $('new').onclick=()=>{
 $('modal').classList.add('show')
 };
-
 $('cancel').onclick=()=>{
 $('modal').classList.remove('show')
 };
-
 $('yes').onclick=()=>{
-
 $('modal').classList.remove('show');
-
 /*
   새 대화를 시작했다는 표시.
   이후 begin()에서 기존 localStorage 대화를
   다시 불러오지 않도록 한다.
 */
 newChatStarted=true;
-
 history=[];
-
 chatState={
 location:'-',
 time:'-',
 situation:'-'
 };
-
 localStorage.removeItem(chatKey);
-
 if(saveChatTimer){
 clearTimeout(saveChatTimer);
 saveChatTimer=null
 }
-
 $('input').value='';
 $('messages').innerHTML='';
-
 $('turn').textContent='0턴 · 자동 저장됨';
-
 updateChatState();
-
 window.scrollTo(0,0);
-
 };
-
 $('saveChat').onclick=()=>{
-
 download(
 JSON.stringify(
 {
@@ -904,122 +700,79 @@ null,
 ),
 (text('name')||'chat')+'-conversation.json'
 )
-
 };
-
 $('loadChat').onclick=()=>$('chatFile').click();
-
 $('chatFile').onchange=async e=>{
-
 try{
-
 let d=JSON.parse(await e.target.files[0].text());
-
 history=d.history||[];
-
 if(d.chatState)chatState=d.chatState;
-
 newChatStarted=false;
-
 saveChatNow();
 updateChatState();
 render();
-
 alert('대화를 복구했습니다.')
-
 }catch{
-
 alert('대화 파일을 읽지 못했습니다.')
-
 }
-
 e.target.value=''
 };
-
 $('readWorld').onclick=async()=>{
-
 let url=text('worldUrl');
-
 if(!url)
 return $('worldStatus').textContent='링크를 입력해주세요.';
-
 $('worldStatus').textContent='자료 읽는 중…';
-
 try{
-
 let r=await fetch(url);
-
 if(!r.ok)throw Error();
-
 let doc=new DOMParser().parseFromString(
 await r.text(),
 'text/html'
 );
-
 doc.querySelectorAll(
 'script,style,noscript,svg'
 ).forEach(x=>x.remove());
-
 let content=(doc.body?.innerText||'')
 .replace(/\s+/g,' ')
 .trim();
-
 if(!content)throw Error();
-
 if(content.length>12000)
 content=content.slice(0,12000);
-
 $('world').value=
 text('world')+
 (text('world')?'\n\n':'')+
 '[외부 세계관 자료]\n'+
 content;
-
 saveLocal();
-
 $('worldStatus').textContent='세계관 자료를 추가했습니다.'
-
 }catch(e){
-
 $('worldStatus').textContent=
 '읽지 못했습니다. 해당 사이트가 외부 접근을 막고 있을 수 있습니다.'
-
 }
 };
-
 /*
   페이지가 실제로 종료될 때는 예약된 저장을 취소하고
   즉시 마지막 상태를 저장한다.
 */
 window.addEventListener('beforeunload',()=>{
-
 saveLocal();
 saveChatNow();
-
 });
-
 /*
   Safari에서 다른 앱으로 이동하거나 탭이 백그라운드로 갈 때
   현재 상태를 즉시 저장한다.
 */
 document.addEventListener('visibilitychange',()=>{
-
 if(document.hidden){
-
 saveLocal();
 saveChatNow();
-
 }
-
 });
-
 loadLocal();
-
 /*
   처음 사이트를 열었을 때는 저장된 대화를 불러온다.
 */
 loadChatLocal();
-
 preview();
 updateChatState();
 </script>
