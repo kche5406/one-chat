@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="ko">
 <head>
@@ -254,10 +255,12 @@ ${text('userInfo')}
 ${text('opening')}
 설정을 최우선으로 유지한다.
 실제 대화처럼 자연스럽게 답한다.
-모든 지문은 자연스러운 한국어로 작성한다. 불필요한 영어 단어를 문장에 섞지 않으며, 신체 부위·동작·표정·감정은 적절한 한국어 표현으로 서술한다.
-지문은 과거형 서술체로 통일한다. '~했다', '~었다', '~였다' 등을 사용하며, 현재형 서술로 갑자기 전환하지 않는다.
-캐릭터의 대사는 기존 말투와 개성을 유지한다. 이 규칙은 지문에 적용하며, 대사의 표현까지 일괄적으로 바꾸지 않는다.
-응답을 출력하기 전에 영어 단어의 불필요한 혼용, 시제 불일치, 어색한 문장을 점검하고 자연스럽게 수정한다.
+모든 서술 지문은 자연스럽고 매끄러운 한국어로 작성한다. 영어 문장이나 번역되지 않은 영어 일반 단어를 지문에 그대로 남기지 말고, 의미에 맞는 자연스러운 한국어로 바꾼다. 다만 인명·고유명사·세계관에서 정한 명칭처럼 번역하면 안 되는 표현은 유지한다.
+지문은 과거형 서술체로 통일한다. '~했다', '~었다', '~였다' 등을 사용하며, 한 문장 안에서 시제가 불필요하게 바뀌지 않게 한다.
+캐릭터의 대사는 기존 말투와 개성을 유지한다. 지문 규칙을 대사에 기계적으로 적용하지 않는다.
+출력하기 전에 문장 전체를 다시 읽고 맞춤법, 띄어쓰기, 중복 단어·문장, 문장 중간의 잘림, 번역되지 않은 영어, 어색한 조사와 어미를 점검해 수정한 최종본만 출력한다.
+완성된 문장을 같은 응답 안에서 반복하지 않는다. 문장이 끝나기 전에 응답을 마치지 말고, 가능한 한 장면과 문장을 자연스럽게 마무리한다.
+사용자가 요청하지 않은 설명이나 자기 점검 과정은 출력하지 않는다.
 표정, 시선, 몸짓, 자세, 감정과 주변 상황을 적절히 묘사한다.
 이전 대화의 맥락과 관계를 자연스럽게 이어간다.
 확인형 표현을 습관적으로 반복하지 않는다.
@@ -297,8 +300,8 @@ body:JSON.stringify({
 systemInstruction:{parts:[{text:system()}]},
 contents,
 generationConfig:{
-temperature:1,
-maxOutputTokens:2500
+temperature:0.8,
+maxOutputTokens:3500
 }
 })
 });
@@ -388,18 +391,32 @@ updateChatState();
 saveChat();
 return answer.replace(/\[STATE\][\s\S]*?\[\/STATE\]/i,'').trim()
 }
+function appendWithoutOverlap(current, next){
+/* 이어쓰기 응답이 앞부분 끝을 반복하면 겹치는 부분을 제거한다. */
+const max=Math.min(current.length,next.length,600);
+for(let size=max;size>=20;size--){
+if(current.slice(-size)===next.slice(0,size)){
+return current+next.slice(size);
+}
+}
+return current+next;
+}
 async function generateReply(){
-let work=[...history.slice(-50)],
+const baseContext=[...history.slice(-50)];
+let work=[...baseContext],
 out='',
 n=0;
 while(n<3){
 let r=await request(work);
-out+=r.text;
+const chunk=(r.text||'').trim();
+if(!chunk)break;
+out=appendWithoutOverlap(out,chunk);
 if(r.finishReason!=='MAX_TOKENS')break;
+/* 이전 출력의 마지막 지점부터 이어 쓰도록 지시하고, 전체를 다시 시작하지 않게 한다. */
 work=[
-...work.slice(-48),
-{role:'model',parts:[{text:r.text}]},
-{role:'user',parts:[{text:'앞의 내용을 반복하지 말고 자연스럽게 이어서 완성해주세요.'}]}
+...baseContext,
+{role:'model',parts:[{text:out}]},
+{role:'user',parts:[{text:'직전 응답은 출력 길이 제한으로 중간에 끊겼다. 이미 작성된 내용을 다시 쓰거나 요약하지 말고, 마지막 문장의 이어지는 부분부터 자연스럽게 계속 작성해 완성하라. 반복 없이 문장을 마무리하고, 맨 마지막에 [STATE] 블록을 완성해서 출력하라.'}]}
 ];
 n++
 }
